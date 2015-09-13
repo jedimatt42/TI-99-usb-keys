@@ -26,6 +26,15 @@ int ti_r2 = 22; // key_cable_pin_1
 
 void setPinModes() 
 {
+  setInputs();
+  int outputMode = OUTPUT_OPENDRAIN;
+  setOutputs(outputMode);
+  // for griggles, if these all go to input mode will the TI keyboard work?
+  setOutputs(INPUT);
+}
+
+void setInputs() 
+{
   int inputMode = INPUT_PULLUP;
   pinMode(ti_c0, inputMode);
   pinMode(ti_c1, inputMode);
@@ -33,8 +42,10 @@ void setPinModes()
   pinMode(ti_c3, inputMode);
   pinMode(ti_c4, inputMode);
   pinMode(ti_c6, inputMode);
+}
 
-  int outputMode = OUTPUT_OPENDRAIN;
+void setOutputs(int outputMode)
+{
   pinMode(ti_r0, outputMode);
   pinMode(ti_r1, outputMode);
   pinMode(ti_r2, outputMode);
