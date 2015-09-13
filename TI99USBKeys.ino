@@ -7,6 +7,19 @@
 #include <SPI.h>
 #endif
 
+int pin_c1 = 0;
+int pin_r1 = 1;
+
+class TIKeys
+{
+  public:
+    volatile int C1 = 0;
+    volatile int R1 = 0;
+};
+
+
+TIKeys tiKeys;
+
 class KbdRptParser : public KeyboardReportParser
 {
     void PrintKey(uint8_t mod, uint8_t key);
@@ -17,6 +30,7 @@ class KbdRptParser : public KeyboardReportParser
     void OnKeyDown	(uint8_t mod, uint8_t key);
     void OnKeyUp	(uint8_t mod, uint8_t key);
     void OnKeyPressed(uint8_t key);
+
 };
 
 void KbdRptParser::PrintKey(uint8_t m, uint8_t key)
@@ -40,10 +54,9 @@ void KbdRptParser::PrintKey(uint8_t m, uint8_t key)
 
 void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
-  Serial.print("DN ");
+  //Serial.print("DN ");
   PrintKey(mod, key);
   uint8_t c = OemToAscii(mod, key);
-  digitalWrite(1, LOW);
   
   if (c)
     OnKeyPressed(c);
@@ -58,48 +71,51 @@ void KbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after) {
   *((uint8_t*)&afterMod) = after;
 
   if (beforeMod.bmLeftCtrl != afterMod.bmLeftCtrl) {
-    Serial.println("LeftCtrl changed");
+     Serial.println("LeftCtrl changed");
   }
   if (beforeMod.bmLeftShift != afterMod.bmLeftShift) {
-    Serial.println("LeftShift changed");
+     Serial.println("LeftShift changed");
   }
   if (beforeMod.bmLeftAlt != afterMod.bmLeftAlt) {
-    Serial.println("LeftAlt changed");
+     Serial.println("LeftAlt changed");
   }
   if (beforeMod.bmLeftGUI != afterMod.bmLeftGUI) {
-    Serial.println("LeftGUI changed");
+     Serial.println("LeftGUI changed");
   }
 
   if (beforeMod.bmRightCtrl != afterMod.bmRightCtrl) {
-    Serial.println("RightCtrl changed");
+     Serial.println("RightCtrl changed");
   }
   if (beforeMod.bmRightShift != afterMod.bmRightShift) {
-    Serial.println("RightShift changed");
+     Serial.println("RightShift changed");
   }
   if (beforeMod.bmRightAlt != afterMod.bmRightAlt) {
-    Serial.println("RightAlt changed");
+     Serial.println("RightAlt changed");
   }
   if (beforeMod.bmRightGUI != afterMod.bmRightGUI) {
-    Serial.println("RightGUI changed");
+     Serial.println("RightGUI changed");
   }
 
 }
 
 void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
-  Serial.print("UP ");
+  // Serial.print("UP ");
   PrintKey(mod, key);
-  digitalWrite(1, HIGH);
+  tiKeys.R1 = 0;
+  tiKeys.C1 = 0;
 }
 
 void KbdRptParser::OnKeyPressed(uint8_t key)
 {
-  Serial.print("ASCII: ");
-  Serial.println((char)key);
+  // Serial.print("ASCII: ");
+  // Serial.println((char)key);
+  tiKeys.R1 = 1;
+  tiKeys.C1 = 1;
 };
 
 USB     Usb;
-//USBHub     Hub(&Usb);
+USBHub     Hub(&Usb);
 HIDBoot<HID_PROTOCOL_KEYBOARD>    HidKeyboard(&Usb);
 
 uint32_t next_time;
@@ -108,13 +124,10 @@ KbdRptParser Prs;
 
 void setup()
 {
-  pinMode(0, INPUT);
-  pinMode(1, OUTPUT_OPENDRAIN);
+  pinMode(pin_c1, INPUT);
+  pinMode(pin_r1, OUTPUT_OPENDRAIN);
   
   Serial.begin( 115200 );
-#if !defined(__MIPSEL__)
-  while (!Serial); // Wait for serial port to connect - used on Leonardo, Teensy and other boards with built-in USB CDC serial connection
-#endif
   Serial.println("Start");
 
   if (Usb.Init() == -1)
@@ -130,6 +143,10 @@ void setup()
 void loop()
 {
   Usb.Task();
-  // TODO... simulate key press
+  if( digitalRead(pin_c1) ) {
+    digitalWrite(pin_r1, LOW);
+  } else {
+    digitalWrite(pin_r1, HIGH);
+  }
 }
 
