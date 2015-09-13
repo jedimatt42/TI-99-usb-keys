@@ -7,8 +7,43 @@
 #include <SPI.h>
 #endif
 
-int pin_c1 = 0;
-int pin_r1 = 1;
+int ti_c3 = 6; // key_cable_pin_15
+int ti_c2 = 5; // key_cable_pin_14
+int ti_c1 = 4; // key_cable_pin_13
+int ti_c0 = 3; // key_cable_pin_12
+int ti_c4 = 2; // key_cable_pin_9
+int ti_c5 = 1; // key_cable_pin_8
+int ti_c6 = 0; // key_cable_pin_6
+
+int ti_r7 = 15; // key_cable_pin_11
+int ti_r6 = 16; // key_cable_pin_10
+int ti_r4 = 17; // key_cable_pin_7
+int ti_r0 = 18; // key_cable_pin_5
+int ti_r1 = 19; // key_cable_pin_4
+int ti_r5 = 20; // key_cable_pin_3
+int ti_r3 = 21; // key_cable_pin_2
+int ti_r2 = 22; // key_cable_pin_1
+
+void setPinModes() 
+{
+  int inputMode = INPUT_PULLUP;
+  pinMode(ti_c0, inputMode);
+  pinMode(ti_c1, inputMode);
+  pinMode(ti_c2, inputMode);
+  pinMode(ti_c3, inputMode);
+  pinMode(ti_c4, inputMode);
+  pinMode(ti_c6, inputMode);
+
+  int outputMode = OUTPUT_OPENDRAIN;
+  pinMode(ti_r0, outputMode);
+  pinMode(ti_r1, outputMode);
+  pinMode(ti_r2, outputMode);
+  pinMode(ti_r3, outputMode);
+  pinMode(ti_r4, outputMode);
+  pinMode(ti_r5, outputMode);
+  pinMode(ti_r6, outputMode);
+  pinMode(ti_r7, outputMode);
+}
 
 class TIKeys
 {
@@ -54,7 +89,7 @@ void KbdRptParser::PrintKey(uint8_t m, uint8_t key)
 
 void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
-  //Serial.print("DN ");
+  Serial.print("DN ");
   PrintKey(mod, key);
   uint8_t c = OemToAscii(mod, key);
   
@@ -100,7 +135,7 @@ void KbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after) {
 
 void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
-  // Serial.print("UP ");
+  Serial.print("UP ");
   PrintKey(mod, key);
   tiKeys.R1 = 0;
   tiKeys.C1 = 0;
@@ -108,8 +143,8 @@ void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 
 void KbdRptParser::OnKeyPressed(uint8_t key)
 {
-  // Serial.print("ASCII: ");
-  // Serial.println((char)key);
+  Serial.print("ASCII: ");
+  Serial.println((char)key);
   tiKeys.R1 = 1;
   tiKeys.C1 = 1;
 };
@@ -124,14 +159,19 @@ KbdRptParser Prs;
 
 void setup()
 {
-  pinMode(pin_c1, INPUT);
-  pinMode(pin_r1, OUTPUT_OPENDRAIN);
+  setPinModes();
   
   Serial.begin( 115200 );
+
+  // THIS BLOCKS IF NOT CONNECTED TO PC.
+  while(!Serial); 
+  
   Serial.println("Start");
 
   if (Usb.Init() == -1)
     Serial.println("OSC did not start.");
+  else
+    Serial.println("USB.Init succeeded.");
 
   delay( 200 );
 
@@ -143,10 +183,5 @@ void setup()
 void loop()
 {
   Usb.Task();
-  if( digitalRead(pin_c1) ) {
-    digitalWrite(pin_r1, LOW);
-  } else {
-    digitalWrite(pin_r1, HIGH);
-  }
 }
 
