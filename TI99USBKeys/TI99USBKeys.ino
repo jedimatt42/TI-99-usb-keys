@@ -11,13 +11,12 @@ int ti_c3 = 6; // key_cable_pin_15
 int ti_c2 = 5; // key_cable_pin_14
 int ti_c1 = 4; // key_cable_pin_13
 int ti_c0 = 3; // key_cable_pin_12
-int ti_c4 = 2; // key_cable_pin_9
-int ti_c5 = 1; // key_cable_pin_8
-int ti_c6 = 0; // key_cable_pin_6
-
 int ti_r7 = 15; // key_cable_pin_11
 int ti_r6 = 16; // key_cable_pin_10
+int ti_c4 = 2; // key_cable_pin_9
+int ti_c5 = 1; // key_cable_pin_8
 int ti_r4 = 17; // key_cable_pin_7
+int ti_c6 = 0; // key_cable_pin_6
 int ti_r0 = 18; // key_cable_pin_5
 int ti_r1 = 19; // key_cable_pin_4
 int ti_r5 = 20; // key_cable_pin_3
@@ -41,6 +40,7 @@ void setInputs()
   pinMode(ti_c2, inputMode);
   pinMode(ti_c3, inputMode);
   pinMode(ti_c4, inputMode);
+  pinMode(ti_c5, inputMode);
   pinMode(ti_c6, inputMode);
 }
 
@@ -54,6 +54,53 @@ void setOutputs(int outputMode)
   pinMode(ti_r5, outputMode);
   pinMode(ti_r6, outputMode);
   pinMode(ti_r7, outputMode);
+}
+
+void onTiC0()
+{
+  Serial.println("0");
+}
+
+void onTiC1()
+{
+  Serial.print("1");
+}
+
+void onTiC2()
+{
+  Serial.print("2");
+}
+
+void onTiC3()
+{
+  Serial.print("3");
+}
+
+void onTiC4()
+{
+  Serial.print("4");
+}
+
+void onTiC5()
+{
+  Serial.print("5");
+}
+
+void onTiC6()
+{
+  Serial.print("6");
+}
+
+void setColumnInterrupts()
+{
+  int interruptMode = FALLING;
+  attachInterrupt(ti_c0, onTiC0, interruptMode);
+  attachInterrupt(ti_c1, onTiC1, interruptMode);
+  attachInterrupt(ti_c2, onTiC2, interruptMode);
+  attachInterrupt(ti_c3, onTiC3, interruptMode);
+  attachInterrupt(ti_c4, onTiC4, interruptMode);
+  attachInterrupt(ti_c5, onTiC5, interruptMode);
+  attachInterrupt(ti_c6, onTiC6, interruptMode);
 }
 
 class TIKeys
@@ -171,6 +218,7 @@ KbdRptParser Prs;
 void setup()
 {
   setPinModes();
+  setColumnInterrupts();
   
   Serial.begin( 115200 );
 
