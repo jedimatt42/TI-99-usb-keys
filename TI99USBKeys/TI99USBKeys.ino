@@ -48,8 +48,8 @@ int* tk_Enter = c0rows+2;
 int* tk_Fctn = c0rows+4;
 int* tk_Shift = c0rows+5;
 int* tk_Ctrl = c0rows+6;
-int* tk_Period = c1rows;
 // column 1
+int* tk_Period = c1rows;
 int* tk_L = c1rows+1;
 int* tk_O = c1rows+2;
 int* tk_9 = c1rows+3;
@@ -127,19 +127,27 @@ void setOutputs(int outputMode)
   pinMode(ti_r7, outputMode);
 }
 
-//----------------------------------------
+//------------------------------------------------------
 // TI Keyboard Column Scan Handling
+//   The following functions are part of the interrupt
+//   handlers triggered when the TI scans a keyboard
+//   column.
 
 void setOutputPin(int pin, int state) 
 {
   if (state) {
+    // The TI input pins are connected to 10K Ohm pull-up resisters. So, to activate we
+    // want to drive them low to ground. 
     pinMode(pin, OUTPUT_OPENDRAIN);
     digitalWrite(pin, LOW);
   } else {
+    // When a key is not pressed, we don't want to drive it anywhere, so that the 
+    // built-in keyboard can still work. 
     pinMode(pin, INPUT);
   }
 }
 
+// Given a columns set of switches, set each output pin accordingly.
 void setRowOutputs(int* rows)
 {
   int i = 0;
@@ -201,38 +209,24 @@ void setColumnInterrupts()
 }
 
 //-----------------------------------------------
-// USB Keyboard input handling
+// USB Keyboard input handling - mostly taken
+//   from the USB Host Boot Keyboard example.
 
 class KbdRptParser : public KeyboardReportParser
 {
     void PrintKey(uint8_t mod, uint8_t key);
 
   protected:
-    void OnControlKeysChanged(uint8_t before, uint8_t after);
-
     void OnKeyDown	(uint8_t mod, uint8_t key);
     void OnKeyUp	(uint8_t mod, uint8_t key);
-    void OnKeyPressed(uint8_t key);
 };
 
 void KbdRptParser::PrintKey(uint8_t m, uint8_t key)
 {
-  MODIFIERKEYS mod;
-  *((uint8_t*)&mod) = m;
-  Serial.print((mod.bmLeftCtrl   == 1) ? "C" : " ");
-  Serial.print((mod.bmLeftShift  == 1) ? "S" : " ");
-  Serial.print((mod.bmLeftAlt    == 1) ? "A" : " ");
-  Serial.print((mod.bmLeftGUI    == 1) ? "G" : " ");
-  Serial.print(m);
-
   Serial.print(" >");
   PrintHex<uint8_t>(key, 0x80);
-  Serial.print("< ");
-
-  Serial.print((mod.bmRightCtrl   == 1) ? "C" : " ");
-  Serial.print((mod.bmRightShift  == 1) ? "S" : " ");
-  Serial.print((mod.bmRightAlt    == 1) ? "A" : " ");
-  Serial.println((mod.bmRightGUI    == 1) ? "G" : " ");
+  Serial.print("< mod:");
+  Serial.println(m);
 };
 
 void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
@@ -285,41 +279,6 @@ void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
   }
 }
 
-void KbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after) {
-
-  MODIFIERKEYS beforeMod;
-  *((uint8_t*)&beforeMod) = before;
-
-  MODIFIERKEYS afterMod;
-  *((uint8_t*)&afterMod) = after;
-
-  if (beforeMod.bmLeftCtrl != afterMod.bmLeftCtrl) {
-     Serial.println("LeftCtrl changed");
-  }
-  if (beforeMod.bmLeftShift != afterMod.bmLeftShift) {
-     Serial.println("LeftShift changed");
-  }
-  if (beforeMod.bmLeftAlt != afterMod.bmLeftAlt) {
-     Serial.println("LeftAlt changed");
-  }
-  if (beforeMod.bmLeftGUI != afterMod.bmLeftGUI) {
-     Serial.println("LeftGUI changed");
-  }
-
-  if (beforeMod.bmRightCtrl != afterMod.bmRightCtrl) {
-     Serial.println("RightCtrl changed");
-  }
-  if (beforeMod.bmRightShift != afterMod.bmRightShift) {
-     Serial.println("RightShift changed");
-  }
-  if (beforeMod.bmRightAlt != afterMod.bmRightAlt) {
-     Serial.println("RightAlt changed");
-  }
-  if (beforeMod.bmRightGUI != afterMod.bmRightGUI) {
-     Serial.println("RightGUI changed");
-  }
-
-}
 
 USB     Usb;
 USBHub     Hub(&Usb);
@@ -355,6 +314,7 @@ void setup()
 
 void loop()
 {
+  // Read USB input which updates the state of the in-memory keyboard matrix.
   Usb.Task();
 }
 
