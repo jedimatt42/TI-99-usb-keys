@@ -122,7 +122,8 @@ void initInputs()
 void initOutputs()
 {
    // Init outputs to 'floating undriven' so as to not interfere with TI keyboard.
-  int outputMode = INPUT;
+  // int outputMode = INPUT;
+  int outputMode = OUTPUT_OPENDRAIN;
   pinMode(ti_r0, outputMode);
   pinMode(ti_r1, outputMode);
   pinMode(ti_r2, outputMode);
@@ -430,7 +431,7 @@ void setup()
   Serial.begin( 115200 );
 
   // THIS BLOCKS IF NOT CONNECTED TO PC.
-  while(!Serial); 
+  // while(!Serial); 
   
   Serial.println("Start");
 
