@@ -41,14 +41,14 @@ int c5rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int c6rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 // map symbols for the address of column/row pairs ( a key on the TI matrix )
-// column 0
+// column 0 (= space enter fctn shift ctrl)
 int* tk_Equal = c0rows;
 int* tk_Space = c0rows+1;
 int* tk_Enter = c0rows+2;
 int* tk_Fctn = c0rows+4;
 int* tk_Shift = c0rows+5;
 int* tk_Ctrl = c0rows+6;
-// column 1
+// column 1 (. L O 9 2 S W X)
 int* tk_Period = c1rows;
 int* tk_L = c1rows+1;
 int* tk_O = c1rows+2;
@@ -225,7 +225,10 @@ class KbdRptParser : public KeyboardReportParser
   protected:
     void OnKeyDown	(uint8_t mod, uint8_t key);
     void OnKeyUp	(uint8_t mod, uint8_t key);
-    void toggleKey(uint8_t mod, uint8_t key, int state);
+
+  private:
+    void toggleKey(uint8_t key, int state);
+    void toggleMod(uint8_t mod, int state);
 };
 
 void KbdRptParser::PrintKey(uint8_t m, uint8_t key)
@@ -240,27 +243,37 @@ void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
   Serial.print("DN ");
   PrintKey(mod, key);
-  switch(mod) {
-    case 64:
-      *tk_Fctn = 1;
-      break;
-  }
-  toggleKey(mod, key, 1);
+  toggleMod(mod, 1);
+  toggleKey(key, 1);
 }
 
 void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
   Serial.print("UP ");
   PrintKey(mod, key);
-  switch(mod) {
-    case 64:
-      *tk_Fctn = 0;
-    break;
-  }
-  toggleKey(mod, key, 0);
+  toggleKey(key, 0);
+  toggleMod(mod, 0);
 }
 
-void KbdRptParser::toggleKey(uint8_t mod, uint8_t key, int state)
+void KbdRptParser::toggleMod(uint8_t mod, int state)
+{
+  switch(mod) {
+    case 32:
+    case 2:
+      *tk_Shift = state;
+      break;
+    case 64:
+    case 4:
+      *tk_Fctn = state;
+    break;
+    case 16:
+    case 1:
+      *tk_Ctrl = state;
+      break;
+  }
+}
+
+void KbdRptParser::toggleKey(uint8_t key, int state)
 {
     switch(key) {
     // ---------- First row of TI keyboard
@@ -324,6 +337,9 @@ void KbdRptParser::toggleKey(uint8_t mod, uint8_t key, int state)
       break;
     case 0x12:
       *tk_O = state; // oh
+      break;
+    case 0x13:
+      *tk_P = state;
       break;
     case 0x38:
       *tk_Slash = state; // '/'
