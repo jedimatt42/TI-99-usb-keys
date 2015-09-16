@@ -6,7 +6,7 @@ matrix keyboard built into the TI.
 
 The USB keyboard can be used with the TI keyboard still in place. The user can switch between them at will.
 
-At this time, it is on a breardboard. And the keyboard map is just beginning... far from complete.
+At this time, it is on a breadboard. And the keyboard map is just the TI keys and modifiers.
 
 [Pictures](https://goo.gl/photos/xhLKCTwCPuAeUbP86)
 
