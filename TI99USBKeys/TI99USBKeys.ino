@@ -97,13 +97,17 @@ int* tk_Z = c5rows+7;
 int* tk_Alpha = c6rows+4;
 
 
-void setPinModes() 
+
+//-------------------------------------
+// Initialize the TI interfacing pins.
+
+void initPinModes() 
 {
-  setInputs();
-  setOutputs(INPUT);
+  initInputs();
+  initOutputs();
 }
 
-void setInputs() 
+void initInputs() 
 {
   int inputMode = INPUT_PULLUP;
   pinMode(ti_c0, inputMode);
@@ -115,8 +119,10 @@ void setInputs()
   pinMode(ti_c6, inputMode);
 }
 
-void setOutputs(int outputMode)
+void initOutputs()
 {
+   // Init outputs to 'floating undriven' so as to not interfere with TI keyboard.
+  int outputMode = INPUT;
   pinMode(ti_r0, outputMode);
   pinMode(ti_r1, outputMode);
   pinMode(ti_r2, outputMode);
@@ -219,6 +225,7 @@ class KbdRptParser : public KeyboardReportParser
   protected:
     void OnKeyDown	(uint8_t mod, uint8_t key);
     void OnKeyUp	(uint8_t mod, uint8_t key);
+    void toggleKey(uint8_t mod, uint8_t key, int state);
 };
 
 void KbdRptParser::PrintKey(uint8_t m, uint8_t key)
@@ -238,20 +245,7 @@ void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
       *tk_Fctn = 1;
       break;
   }
-  switch(key) {
-    case 0x28:
-      *tk_Enter = 1;
-      break;
-    case 0x1E:
-      *tk_1 = 1;
-      break;
-    case 0x1F:
-      *tk_2 = 1;
-      break;
-    case 0x2E:
-      *tk_Equal = 1;
-      break;
-  }
+  toggleKey(mod, key, 1);
 }
 
 void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
@@ -263,22 +257,146 @@ void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
       *tk_Fctn = 0;
     break;
   }
-  switch(key) {
-    case 0x28:
-      *tk_Enter = 0;
-      break;
+  toggleKey(mod, key, 0);
+}
+
+void KbdRptParser::toggleKey(uint8_t mod, uint8_t key, int state)
+{
+    switch(key) {
+    // ---------- First row of TI keyboard
     case 0x1E:
-      *tk_1 = 0;
+      *tk_1 = state;
       break;
     case 0x1F:
-      *tk_2 = 0;
+      *tk_2 = state;
+      break;
+    case 0x20:
+      *tk_3 = state;
+      break;
+    case 0x21:
+      *tk_4 = state;
+      break;
+    case 0x22:
+      *tk_5 = state;
+      break;
+    case 0x23:
+      *tk_6 = state;
+      break;
+    case 0x24:
+      *tk_7 = state;
+      break;
+    case 0x25:
+      *tk_8 = state;
+      break;
+    case 0x26:
+      *tk_9 = state;
+      break;
+    case 0x27:
+      *tk_0 = state; // zero
       break;
     case 0x2E:
-      *tk_Equal = 0;
+      *tk_Equal = state;
+      break;
+    // ------ Second Row
+    case 0x14:
+      *tk_Q = state;
+      break;
+    case 0x1A:
+      *tk_W = state;
+      break;
+    case 0x08:
+      *tk_E = state;
+      break;
+    case 0x15:
+      *tk_R = state;
+      break;
+    case 0x17:
+      *tk_T = state;
+      break;
+    case 0x1C:
+      *tk_Y = state;
+      break;
+    case 0x18:
+      *tk_U = state;
+      break;
+    case 0x0C:
+      *tk_I = state;
+      break;
+    case 0x12:
+      *tk_O = state; // oh
+      break;
+    case 0x38:
+      *tk_Slash = state; // '/'
+      break;
+    // ---------- Third Row
+    case 0x04:
+      *tk_A = state;
+      break;
+    case 0x16:
+      *tk_S = state;
+      break;
+    case 0x07:
+      *tk_D = state;
+      break;
+    case 0x09:
+      *tk_F = state;
+      break;
+    case 0x0A:
+      *tk_G = state;
+      break;
+    case 0x0B:
+      *tk_H = state;
+      break;
+    case 0x0D:
+      *tk_J = state;
+      break;
+    case 0x0E:
+      *tk_K = state;
+      break;
+    case 0x0F:
+      *tk_L = state;
+      break;
+    case 0x33:
+      *tk_Semicolon = state;
+      break;
+    case 0x28:
+    case 0x58:
+      *tk_Enter = state;
+      break;
+    // --------- Fourth Row 
+    case 0x1D:
+      *tk_Z = state;
+      break;
+    case 0x1B:
+      *tk_X = state;
+      break;
+    case 0x06:
+      *tk_C = state;
+      break;
+    case 0x19:
+      *tk_V = state;
+      break;
+    case 0x05:
+      *tk_B = state;
+      break;
+    case 0x11:
+      *tk_N = state;
+      break;
+    case 0x10:
+      *tk_M = state;
+      break;
+    case 0x36:
+      *tk_Comma = state;
+      break;
+    case 0x37:
+      *tk_Period = state;
+      break;
+    // ----------- Fifth Row
+    case 0x2C:
+      *tk_Space = state;
       break;
   }
 }
-
 
 USB     Usb;
 USBHub     Hub(&Usb);
@@ -290,7 +408,7 @@ KbdRptParser Prs;
 
 void setup()
 {
-  setPinModes();
+  initPinModes();
   setColumnInterrupts();
   
   Serial.begin( 115200 );
