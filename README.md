@@ -6,7 +6,10 @@ matrix keyboard built into the TI.
 
 The USB keyboard can be used with the TI keyboard still in place. The user can switch between them at will.
 
-At this time, it is on a breadboard. And the keyboard map is just the TI keys and modifiers.
+At this time, it is on a breadboard. 
+All of the PC Keys have been mapped, except caps-lock is never on, and num-lock always is.
+
+I have no mapping for HOME, END, PGDN, PGUP, and gui keys (windows keys)
 
 [Pictures](https://goo.gl/photos/xhLKCTwCPuAeUbP86)
 
