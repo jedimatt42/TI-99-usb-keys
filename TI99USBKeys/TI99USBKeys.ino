@@ -230,6 +230,7 @@ class KbdRptParser : public KeyboardReportParser
   private:
     void toggleKey(uint8_t key, int state);
     void toggleMod(uint8_t mod, int state);
+    boolean specialCombos(uint8_t mod, uint8_t key, int state);
 };
 
 void KbdRptParser::PrintKey(uint8_t m, uint8_t key)
@@ -244,16 +245,56 @@ void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
   Serial.print("DN ");
   PrintKey(mod, key);
-  toggleMod(mod, 1);
-  toggleKey(key, 1);
+  if ( !specialCombos(mod, key, 1) ) {
+    toggleMod(mod, 1);
+    toggleKey(key, 1);
+  }
 }
 
 void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
   Serial.print("UP ");
   PrintKey(mod, key);
-  toggleKey(key, 0);
-  toggleMod(mod, 0);
+  if ( !specialCombos(mod, key, 0) ) {
+    toggleMod(mod, 0);
+    toggleKey(key, 0);
+  }
+}
+
+boolean KbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state) 
+{
+  switch(mod) {
+    case 32:
+    case 2:
+      switch(key) {
+        case 0x35: // ` -> ~
+          *tk_Fctn = state;
+          *tk_W = state;
+          return true;
+        case 0x2F: // [ -> {
+          *tk_Fctn = state;
+          *tk_F = state;
+          return true;
+        case 0x30: // ] -> }
+          *tk_Fctn = state;
+          *tk_G = state;
+          return true;
+        case 0x31: // \ -> |
+          *tk_Fctn = state;
+          *tk_A = state;
+          return true;
+        case 0x38: // / -> ?
+          *tk_Fctn = state;
+          *tk_I = state;
+          return true;
+        case 0x2D: // - -> _
+          *tk_Fctn = state;
+          *tk_U = state;
+          return true;
+      }
+      break;
+  }
+  return false;
 }
 
 void KbdRptParser::toggleMod(uint8_t mod, int state)
@@ -279,33 +320,43 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
     switch(key) {
     // ---------- First row of TI keyboard
     case 0x1E:
+    case 0x59:
       *tk_1 = state;
       break;
     case 0x1F:
+    case 0x5A:
       *tk_2 = state;
       break;
     case 0x20:
+    case 0x5B:
       *tk_3 = state;
       break;
     case 0x21:
+    case 0x5C:
       *tk_4 = state;
       break;
     case 0x22:
+    case 0x5D:
       *tk_5 = state;
       break;
     case 0x23:
+    case 0x5E:
       *tk_6 = state;
       break;
     case 0x24:
+    case 0x5F:
       *tk_7 = state;
       break;
     case 0x25:
+    case 0x60:
       *tk_8 = state;
       break;
     case 0x26:
+    case 0x61:
       *tk_9 = state;
       break;
     case 0x27:
+    case 0x62:
       *tk_0 = state; // zero
       break;
     case 0x2E:
@@ -343,6 +394,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       *tk_P = state;
       break;
     case 0x38:
+    case 0x54:
       *tk_Slash = state; // '/'
       break;
     // ---------- Third Row
@@ -406,11 +458,100 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       *tk_Comma = state;
       break;
     case 0x37:
+    case 0x63:
       *tk_Period = state;
       break;
     // ----------- Fifth Row
     case 0x2C:
       *tk_Space = state;
+      break;
+    // ----------- PC Unique keys
+    case 0x2A: // backspace
+    case 0x50: // left arrow
+      *tk_Fctn = state;
+      *tk_S = state;
+      break;
+    case 0x4F: // right arrow
+      *tk_Fctn = state;
+      *tk_D = state;
+      break;
+    case 0x52: // up arrow
+      *tk_Fctn = state;
+      *tk_E = state;
+      break;
+    case 0x51: // down arrow
+      *tk_Fctn = state;
+      *tk_X = state;
+      break;
+    case 0x3A: // F1
+    case 0x4C: // Delete
+      *tk_Fctn = state;
+      *tk_1 = state;
+      break;
+    case 0x3B: // F2
+    case 0x49: // Insert
+      *tk_Fctn = state;
+      *tk_2 = state;
+      break;
+    case 0x3C: // F3
+      *tk_Fctn = state;
+      *tk_3 = state;
+      break;
+    case 0x3D: // F4
+    case 0x48: // Break
+      *tk_Fctn = state;
+      *tk_4 = state;
+      break;
+    case 0x3E: // F5
+      *tk_Fctn = state;
+      *tk_5 = state;
+      break;
+    case 0x3F: // F6
+      *tk_Fctn = state;
+      *tk_6 = state;
+      break;
+    case 0x40: // F7
+    case 0x2B: // TAB
+      *tk_Fctn = state;
+      *tk_7 = state;
+      break;
+    case 0x41: // F8
+      *tk_Fctn = state;
+      *tk_8 = state;
+      break;
+    case 0x42: // F9
+    case 0x29: // Esc
+      *tk_Fctn = state;
+      *tk_9 = state;
+      break;
+    case 0x35: // ` - backquote
+      *tk_Fctn = state;
+      *tk_O = state;
+      break;
+    case 0x2D: // hyphen
+    case 0x56: // hyphen numpad
+      *tk_Shift = state;
+      *tk_Slash = state;
+      break;
+    case 0x2F: // [
+      *tk_Fctn = state;
+      *tk_R = state;
+      break;
+    case 0x30: // ]
+      *tk_Fctn = state;
+      *tk_T = state;
+      break;
+    case 0x31: // \ numpad
+      *tk_Fctn = state;
+      *tk_Z = state;
+      break;
+    case 0x55: // * numpad
+      *tk_Shift = state;
+      *tk_8 = state;
+      break;
+    case 0x57: // + numpad
+      *tk_Shift = state;
+      *tk_Equal = state;
       break;
   }
 }
