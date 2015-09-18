@@ -142,16 +142,7 @@ void initOutputs()
 
 void setOutputPin(int pin, int state) 
 {
-  if (state) {
-    // The TI input pins are connected to 10K Ohm pull-up resisters. So, to activate we
-    // want to drive them low to ground. 
-    pinMode(pin, OUTPUT_OPENDRAIN);
-    digitalWrite(pin, LOW);
-  } else {
-    // When a key is not pressed, we don't want to drive it anywhere, so that the 
-    // built-in keyboard can still work. 
-    pinMode(pin, INPUT);
-  }
+  digitalWrite(pin, state ? LOW : HIGH);
 }
 
 // Given a columns set of switches, set each output pin accordingly.
@@ -200,7 +191,7 @@ void onTiC5()
 
 void onTiC6()
 {
-  setRowOutputs(c6rows);
+  setOutputPin(ti_c4, *tk_Alpha);
 }
 
 void setColumnInterrupts()
@@ -255,6 +246,10 @@ void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
   Serial.print("UP ");
   PrintKey(mod, key);
+  if ( key == 0x39 ) {
+    *tk_Alpha = *tk_Alpha ? 0 : 1;
+    return;
+  }
   if ( !specialCombos(mod, key, 0) ) {
     toggleMod(mod, 0);
     toggleKey(key, 0);
@@ -290,6 +285,10 @@ boolean KbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
         case 0x2D: // - -> _
           *tk_Fctn = state;
           *tk_U = state;
+          return true;
+        case 0x34: // ' -> "
+          *tk_Fctn = state;
+          *tk_P = state;
           return true;
       }
       break;
@@ -526,7 +525,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       break;
     case 0x35: // ` - backquote
       *tk_Fctn = state;
-      *tk_O = state;
+      *tk_C = state;
       break;
     case 0x2D: // hyphen
     case 0x56: // hyphen numpad
@@ -552,6 +551,10 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
     case 0x57: // + numpad
       *tk_Shift = state;
       *tk_Equal = state;
+      break;
+    case 0x34: // '
+      *tk_Fctn = state;
+      *tk_O = state;
       break;
   }
 }
