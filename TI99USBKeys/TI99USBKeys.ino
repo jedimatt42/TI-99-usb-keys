@@ -101,7 +101,7 @@ int* tk_Z = c5rows+7;
 // column 6 (alpha_lock)
 int* tk_Alpha = c6rows+4;
 
-
+long fctnEqualsTimestamp = 0L;
 
 //-------------------------------------
 // Initialize the TI interfacing pins.
@@ -269,7 +269,7 @@ void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 boolean KbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state) 
 {
   switch(mod) {
-    case 32:
+    case 32: // Shift
     case 2:
       switch(key) {
         case 0x35: // ` -> ~
@@ -301,6 +301,22 @@ boolean KbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
           *tk_P = state;
           return true;
       }
+      break;
+    case 64: // Alt
+    case 4: 
+      switch(key) {
+        case 0x2E: // =   QUIT -- force high, and leave high on release.. released later in main loop.
+          *tk_Fctn = 1;
+          *tk_Equal = 1;
+          fctnEqualsTimestamp = millis();
+          return true;
+      }
+      break;
+    case 5: // Control-Alt
+    case 80:
+    case 65:
+    case 20:
+      CPU_RESTART;
       break;
   }
   return false;
@@ -625,5 +641,13 @@ void loop()
 {
   // Read USB input which updates the state of the in-memory keyboard matrix.
   Usb.Task();
+  if (fctnEqualsTimestamp != 0) {
+    if ( (millis() - fctnEqualsTimestamp) > 250 ) {
+      fctnEqualsTimestamp = 0L;
+      *tk_Fctn = 0;
+      *tk_Equal = 0;
+      setRowOutputs(c0rows);
+    }
+  }
 }
 
