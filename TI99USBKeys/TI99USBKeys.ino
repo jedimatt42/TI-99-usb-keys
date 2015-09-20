@@ -102,6 +102,7 @@ int* tk_Z = c5rows+7;
 int* tk_Alpha = c6rows+4;
 
 long fctnEqualsTimestamp = 0L;
+bool capsLockOn = false;
 
 //-------------------------------------
 // Initialize the TI interfacing pins.
@@ -126,8 +127,6 @@ void initInputs()
 
 void initOutputs()
 {
-   // Init outputs to 'floating undriven' so as to not interfere with TI keyboard.
-  // int outputMode = INPUT;
   int outputMode = OUTPUT_OPENDRAIN;
   pinMode(ti_r0, outputMode);
   pinMode(ti_r1, outputMode);
@@ -137,6 +136,34 @@ void initOutputs()
   pinMode(ti_r5, outputMode);
   pinMode(ti_r6, outputMode);
   pinMode(ti_r7, outputMode);
+  digitalWrite(ti_r0,HIGH);
+  digitalWrite(ti_r1,HIGH);
+  digitalWrite(ti_r2,HIGH);
+  digitalWrite(ti_r3,HIGH);
+  digitalWrite(ti_r4,HIGH);
+  digitalWrite(ti_r5,HIGH);
+  digitalWrite(ti_r6,HIGH);
+  digitalWrite(ti_r7,HIGH);
+}
+
+void clearRow(int* rows)
+{
+  for( int i = 0; i < 8; i++ ) {
+    rows[i] = 0;
+  }
+}
+
+void initData() 
+{
+  fctnEqualsTimestamp = 0L;
+  capsLockOn = false;
+  clearRow(c0rows);
+  clearRow(c1rows);
+  clearRow(c2rows);
+  clearRow(c3rows);
+  clearRow(c4rows);
+  clearRow(c5rows);
+  clearRow(c6rows);
 }
 
 //------------------------------------------------------
@@ -196,6 +223,7 @@ void onTiC5()
 
 void onTiC6()
 {
+  // If I treat all the rows on this one, then the period key misbehaves.
   setOutputPin(ti_c4, *tk_Alpha);
 }
 
@@ -617,6 +645,7 @@ void setup()
 {
   initPinModes();
   setColumnInterrupts();
+  initData();
   
   Serial.begin( 115200 );
 
