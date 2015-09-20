@@ -215,6 +215,7 @@ class KbdRptParser : public KeyboardReportParser
     void PrintKey(uint8_t mod, uint8_t key);
 
   protected:
+    void OnControlKeysChanged(uint8_t before, uint8_t after);
     void OnKeyDown	(uint8_t mod, uint8_t key);
     void OnKeyUp	(uint8_t mod, uint8_t key);
 
@@ -224,13 +225,18 @@ class KbdRptParser : public KeyboardReportParser
     boolean specialCombos(uint8_t mod, uint8_t key, int state);
 };
 
+void KbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after)
+{
+  
+}
+
 void KbdRptParser::PrintKey(uint8_t m, uint8_t key)
 {
   Serial.print(" >");
   PrintHex<uint8_t>(key, 0x80);
   Serial.print("< mod:");
   Serial.println(m);
-};
+}
 
 void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
@@ -246,10 +252,6 @@ void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
   Serial.print("UP ");
   PrintKey(mod, key);
-  if ( key == 0x39 ) {
-    *tk_Alpha = *tk_Alpha ? 0 : 1;
-    return;
-  }
   if ( !specialCombos(mod, key, 0) ) {
     toggleMod(mod, 0);
     toggleKey(key, 0);
@@ -523,6 +525,18 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       *tk_Fctn = state;
       *tk_9 = state;
       break;
+    case 0x43: // F10
+      *tk_Fctn = state;
+      *tk_0 = state;
+      break;
+    case 0x44: // F11
+      *tk_Ctrl = state;
+      *tk_1 = state;
+      break;
+    case 0x45: // F12
+      *tk_Ctrl = state;
+      *tk_2 = state;
+      break;
     case 0x35: // ` - backquote
       *tk_Fctn = state;
       *tk_C = state;
@@ -555,6 +569,14 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
     case 0x34: // '
       *tk_Fctn = state;
       *tk_O = state;
+      break;
+    case 0x4A: // Home
+      *tk_Ctrl = state;
+      *tk_U = state;
+      break;
+    case 0x4D: // End
+      *tk_Ctrl = state;
+      *tk_V = state;
       break;
   }
 }
