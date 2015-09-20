@@ -7,6 +7,11 @@
 #include <SPI.h>
 #endif
 
+// Reboot support
+#define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
+#define CPU_RESTART_VAL 0x5FA0004
+#define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
+
 // teensy 3.1 pin aliases for TI keyboard connector. 
 //   and info describing the meaning. 
 //   _c? is a column input pin from the TI
@@ -242,6 +247,9 @@ void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
   Serial.print("DN ");
   PrintKey(mod, key);
+
+  // TODO: check here for unmapped keys - reboot, anything else?
+
   if ( !specialCombos(mod, key, 1) ) {
     toggleMod(mod, 1);
     toggleKey(key, 1);
