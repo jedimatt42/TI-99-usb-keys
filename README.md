@@ -12,6 +12,22 @@ At this time, it is on a breadboard.
 
 The keyboard mapping is documented in: keymap.xlsx
 
+## Issues
+
+Serial debugging causes key repeat. Serial debugging off, and things are good. The builtin usb port on the Teensy competes with the interrupts too heavily.
+
+Haven't mapped pgup and pgdn yet.
+
+Holding modifiers is not recognized.
+
+Pressing both modifiers ( left & right shift for example, + a key like h does not produce H. )
+
+Alpha lock - first attempt product bad results... 
+
+Num lock ( and mapping with numlock off ) - currently behaves as though numlock is always on.
+
+No function for Scroll lock at this time.. will just copy Tursi, after I get alpha lock working.
+
 ## Resources
 
 [Teensy 3.1](https://www.pjrc.com/teensy/teensy31.html)
