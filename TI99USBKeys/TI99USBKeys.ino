@@ -552,6 +552,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       break;
     case 0x3D: // F4
     case 0x48: // Break
+    case 0x4E: // PgDn
       *tk_Fctn = state;
       *tk_4 = state;
       break;
@@ -560,6 +561,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       *tk_5 = state;
       break;
     case 0x3F: // F6
+    case 0x4B: // PgUp
       *tk_Fctn = state;
       *tk_6 = state;
       break;

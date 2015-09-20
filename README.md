@@ -14,9 +14,7 @@ The keyboard mapping is documented in: keymap.xlsx
 
 ## Issues
 
-Serial debugging causes key repeat. Serial debugging off, and things are good. The builtin usb port on the Teensy competes with the interrupts too heavily.
-
-Haven't mapped pgup and pgdn yet.
+Serial debugging causes key repeat. With serial debugging off, things are good. The builtin usb port on the Teensy competes with the interrupts too heavily.
 
 Holding modifiers is not recognized.
 
@@ -27,6 +25,8 @@ Alpha lock - first attempt product bad results...
 Num lock ( and mapping with numlock off ) - currently behaves as though numlock is always on.
 
 No function for Scroll lock at this time.. will just copy Tursi, after I get alpha lock working.
+
+Hot-plugging the keyboard doesn't work.
 
 ## Resources
 
