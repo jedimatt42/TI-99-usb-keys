@@ -126,7 +126,8 @@ void initInputs()
 
 void initOutputs()
 {
-  int outputMode = OUTPUT; //_OPENDRAIN;
+  // this mode seems to work well with letting the TI builtin keyboard still function.
+  int outputMode = OUTPUT_OPENDRAIN; 
   pinMode(ti_r0, outputMode);
   pinMode(ti_r1, outputMode);
   pinMode(ti_r2, outputMode);
