@@ -15,16 +15,15 @@ The keyboard mapping is documented in: keymap.xlsx
 ## Issues
 
 Serial debugging causes key repeat. With serial debugging off, things are good. The builtin usb port on the Teensy competes with the interrupts too heavily.
+This is only a development issue. 
 
 Holding modifiers is not recognized.
 
 Pressing both modifiers ( left & right shift for example, + a key like h does not produce H. )
 
-Alpha lock - first attempt product bad results... 
-
-Num lock ( and mapping with numlock off ) - currently behaves as though numlock is always on.
-
-No function for Scroll lock at this time.. will just copy Tursi, after I get alpha lock working.
+Locks are stubbed, caps lock works by setting the virtual alpha-lock to be scanned by TI. Other locks set internal mapping modes, that are not used yet:
+* Num lock ( and mapping with numlock off ) - currently behaves as though numlock is always on.
+* No function for Scroll lock at this time.. will just copy Tursi.
 
 Hot-plugging the keyboard doesn't work.
 

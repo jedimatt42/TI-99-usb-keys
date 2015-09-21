@@ -102,7 +102,6 @@ int* tk_Z = c5rows+7;
 int* tk_Alpha = c6rows+4;
 
 long fctnEqualsTimestamp = 0L;
-bool capsLockOn = false;
 
 //-------------------------------------
 // Initialize the TI interfacing pins.
@@ -127,7 +126,7 @@ void initInputs()
 
 void initOutputs()
 {
-  int outputMode = OUTPUT_OPENDRAIN;
+  int outputMode = OUTPUT; //_OPENDRAIN;
   pinMode(ti_r0, outputMode);
   pinMode(ti_r1, outputMode);
   pinMode(ti_r2, outputMode);
@@ -156,7 +155,6 @@ void clearRow(int* rows)
 void initData() 
 {
   fctnEqualsTimestamp = 0L;
-  capsLockOn = false;
   clearRow(c0rows);
   clearRow(c1rows);
   clearRow(c2rows);
@@ -224,7 +222,8 @@ void onTiC5()
 void onTiC6()
 {
   // If I treat all the rows on this one, then the period key misbehaves.
-  setOutputPin(ti_c4, *tk_Alpha);
+  // setOutputPin(ti_c6, *tk_Alpha);
+  setRowOutputs(c6rows);
 }
 
 void setColumnInterrupts()
@@ -245,8 +244,9 @@ void setColumnInterrupts()
 
 class KbdRptParser : public KeyboardReportParser
 {
-    void PrintKey(uint8_t mod, uint8_t key);
-
+    int scrollLockState = 0;
+    int numLockState = 0;
+  
   protected:
     void OnControlKeysChanged(uint8_t before, uint8_t after);
     void OnKeyDown	(uint8_t mod, uint8_t key);
@@ -263,21 +263,8 @@ void KbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after)
   
 }
 
-void KbdRptParser::PrintKey(uint8_t m, uint8_t key)
-{
-  Serial.print(" >");
-  PrintHex<uint8_t>(key, 0x80);
-  Serial.print("< mod:");
-  Serial.println(m);
-}
-
 void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
-  Serial.print("DN ");
-  PrintKey(mod, key);
-
-  // TODO: check here for unmapped keys - reboot, anything else?
-
   if ( !specialCombos(mod, key, 1) ) {
     toggleMod(mod, 1);
     toggleKey(key, 1);
@@ -286,8 +273,6 @@ void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 
 void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
-  Serial.print("UP ");
-  PrintKey(mod, key);
   if ( !specialCombos(mod, key, 0) ) {
     toggleMod(mod, 0);
     toggleKey(key, 0);
@@ -345,6 +330,17 @@ boolean KbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
     case 65:
     case 20:
       CPU_RESTART;
+      break;
+  }
+  switch(key) {
+    case 0x39: // caps lock
+      *tk_Alpha = kbdLockingKeys.kbdLeds.bmCapsLock;
+      break;
+    case 0x47: // scroll lock
+      scrollLockState = kbdLockingKeys.kbdLeds.bmScrollLock;
+      break;
+    case 0x53: // num lock
+      numLockState = kbdLockingKeys.kbdLeds.bmNumLock;
       break;
   }
   return false;
@@ -639,8 +635,6 @@ USB     Usb;
 USBHub     Hub(&Usb);
 HIDBoot<HID_PROTOCOL_KEYBOARD>    HidKeyboard(&Usb);
 
-uint32_t next_time;
-
 KbdRptParser Prs;
 
 void setup()
@@ -648,22 +642,11 @@ void setup()
   initPinModes();
   setColumnInterrupts();
   initData();
-  
-  Serial.begin( 115200 );
 
-  // THIS BLOCKS IF NOT CONNECTED TO PC.
-  // while(!Serial); 
-  
-  Serial.println("Start");
-
-  if (Usb.Init() == -1)
-    Serial.println("OSC did not start.");
-  else
-    Serial.println("USB.Init succeeded.");
+  // Wait for keyboard to be up? This doesn't come close to working.
+  while (Usb.Init() == -1);
 
   delay( 200 );
-
-  next_time = millis() + 5000;
 
   HidKeyboard.SetReportParser(0, (HIDReportParser*)&Prs);
 }
@@ -673,7 +656,7 @@ void loop()
   // Read USB input which updates the state of the in-memory keyboard matrix.
   Usb.Task();
   if (fctnEqualsTimestamp != 0) {
-    if ( (millis() - fctnEqualsTimestamp) > 250 ) {
+    if ( (millis() - fctnEqualsTimestamp) > 150 ) {
       fctnEqualsTimestamp = 0L;
       *tk_Fctn = 0;
       *tk_Equal = 0;
