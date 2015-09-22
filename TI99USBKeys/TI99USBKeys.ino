@@ -222,8 +222,6 @@ void onTiC5()
 
 void onTiC6()
 {
-  // If I treat all the rows on this one, then the period key misbehaves.
-  // setOutputPin(ti_c6, *tk_Alpha);
   setRowOutputs(c6rows);
 }
 
@@ -370,43 +368,33 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
     switch(key) {
     // ---------- First row of TI keyboard
     case 0x1E:
-    case 0x59:
       *tk_1 = state;
       break;
     case 0x1F:
-    case 0x5A:
       *tk_2 = state;
       break;
     case 0x20:
-    case 0x5B:
       *tk_3 = state;
       break;
     case 0x21:
-    case 0x5C:
       *tk_4 = state;
       break;
     case 0x22:
-    case 0x5D:
       *tk_5 = state;
       break;
     case 0x23:
-    case 0x5E:
       *tk_6 = state;
       break;
     case 0x24:
-    case 0x5F:
       *tk_7 = state;
       break;
     case 0x25:
-    case 0x60:
       *tk_8 = state;
       break;
     case 0x26:
-    case 0x61:
       *tk_9 = state;
       break;
     case 0x27:
-    case 0x62:
       *tk_0 = state; // zero
       break;
     case 0x2E:
@@ -518,19 +506,27 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
     // ----------- PC Unique keys
     case 0x2A: // backspace
     case 0x50: // left arrow
-      *tk_Fctn = state;
+      if ( !scrollLockState ) {
+        *tk_Fctn = state;
+      }
       *tk_S = state;
       break;
     case 0x4F: // right arrow
-      *tk_Fctn = state;
+      if ( !scrollLockState ) {
+        *tk_Fctn = state;
+      }
       *tk_D = state;
       break;
     case 0x52: // up arrow
-      *tk_Fctn = state;
+      if ( !scrollLockState ) {
+        *tk_Fctn = state;
+      }
       *tk_E = state;
       break;
     case 0x51: // down arrow
-      *tk_Fctn = state;
+      if ( !scrollLockState ) {
+        *tk_Fctn = state;
+      }
       *tk_X = state;
       break;
     case 0x3A: // F1
@@ -605,6 +601,77 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       *tk_Fctn = state;
       *tk_T = state;
       break;
+    case 0x59: // 1 numpad
+      if ( numLockState ) {
+        // act like the end key
+        *tk_Ctrl = state;
+        *tk_V = state;
+      } else {
+        *tk_1 = state;
+      }
+      break;
+    case 0x5A: // 2 numpad
+      if ( numLockState ) {
+        *tk_Fctn = state;
+        *tk_X = state;
+      } else {
+        *tk_2 = state;
+      }
+      break;
+    case 0x5B: // 3 numpad
+      if ( numLockState ) {
+        *tk_Fctn = state;
+        *tk_4 = state;
+      } else {
+        *tk_3 = state;
+      }
+      break;
+    case 0x5C: // 4 numpad
+      if ( numLockState ) {
+        *tk_Fctn = state;
+        *tk_S = state;
+      } else {
+        *tk_4 = state;
+      }
+      break;
+    case 0x5D: // 5 numpad
+      *tk_5 = state;
+      break;
+    case 0x5E: // 6 numpad
+      if ( numLockState ) {
+        *tk_Fctn = state;
+        *tk_D = state;
+      } else {
+        *tk_6 = state;
+      }
+      break;
+    case 0x5F: // 7 numpad
+      if ( numLockState ) {
+        *tk_Ctrl = state;
+        *tk_U = state;
+      } else {
+        *tk_7 = state;
+      }
+      break;
+    case 0x60: // 8 numpad
+      if ( numLockState ) {
+        *tk_Fctn = state;
+        *tk_E = state;
+      } else {
+        *tk_8 = state;
+      }
+      break;
+    case 0x61: // 9 numpad
+      if ( numLockState ) {
+        *tk_Fctn = state;
+        *tk_6 = state;
+      } else {
+        *tk_9 = state;
+      }
+      break;
+    case 0x62: // 0 numpad
+      *tk_0 = state;
+      break;
     case 0x31: // \ numpad
       *tk_Fctn = state;
       *tk_Z = state;
@@ -640,6 +707,8 @@ KbdRptParser Prs;
 
 void setup()
 {
+  pinMode(14, OUTPUT);
+  
   initPinModes();
   setColumnInterrupts();
   initData();
@@ -664,5 +733,8 @@ void loop()
       setRowOutputs(c0rows);
     }
   }
+  // For debugging the shift lock behavior. Turns an LED on if the virtual key matrix thinks shift is down.
+  // I'll leave this in a bit while I work on the ability to hold shift down!
+  digitalWrite(14, *tk_Shift ? HIGH : LOW );
 }
 

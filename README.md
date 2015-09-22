@@ -21,9 +21,7 @@ Holding modifiers is not recognized.
 
 Pressing both modifiers ( left & right shift for example, + a key like h does not produce H. )
 
-Locks are stubbed, caps lock works by setting the virtual alpha-lock to be scanned by TI. Other locks set internal mapping modes, that are not used yet:
-* Num lock ( and mapping with numlock off ) - currently behaves as though numlock is always on.
-* No function for Scroll lock at this time.. will just copy Tursi.
+* Num lock is mapped backwards... :( need to fix that.
 
 Hot-plugging the keyboard doesn't work.
 
