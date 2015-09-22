@@ -496,7 +496,6 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       *tk_Comma = state;
       break;
     case 0x37:
-    case 0x63:
       *tk_Period = state;
       break;
     // ----------- Fifth Row
@@ -602,7 +601,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       *tk_T = state;
       break;
     case 0x59: // 1 numpad
-      if ( numLockState ) {
+      if ( !numLockState ) {
         // act like the end key
         *tk_Ctrl = state;
         *tk_V = state;
@@ -611,7 +610,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x5A: // 2 numpad
-      if ( numLockState ) {
+      if ( !numLockState ) {
         *tk_Fctn = state;
         *tk_X = state;
       } else {
@@ -619,7 +618,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x5B: // 3 numpad
-      if ( numLockState ) {
+      if (! numLockState ) {
         *tk_Fctn = state;
         *tk_4 = state;
       } else {
@@ -627,7 +626,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x5C: // 4 numpad
-      if ( numLockState ) {
+      if ( !numLockState ) {
         *tk_Fctn = state;
         *tk_S = state;
       } else {
@@ -638,7 +637,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       *tk_5 = state;
       break;
     case 0x5E: // 6 numpad
-      if ( numLockState ) {
+      if ( !numLockState ) {
         *tk_Fctn = state;
         *tk_D = state;
       } else {
@@ -646,7 +645,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x5F: // 7 numpad
-      if ( numLockState ) {
+      if ( !numLockState ) {
         *tk_Ctrl = state;
         *tk_U = state;
       } else {
@@ -654,7 +653,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x60: // 8 numpad
-      if ( numLockState ) {
+      if ( !numLockState ) {
         *tk_Fctn = state;
         *tk_E = state;
       } else {
@@ -662,7 +661,7 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x61: // 9 numpad
-      if ( numLockState ) {
+      if ( !numLockState ) {
         *tk_Fctn = state;
         *tk_6 = state;
       } else {
@@ -670,7 +669,20 @@ void KbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x62: // 0 numpad
-      *tk_0 = state;
+      if ( !numLockState ) {
+        *tk_Fctn = state;
+        *tk_2 = state;
+      } else {
+        *tk_0 = state;
+      }
+      break;
+    case 0x63: // . numpad
+      if ( !numLockState ) {
+        *tk_Fctn = state;
+        *tk_1 = state;
+      } else {
+        *tk_Period = state;
+      }
       break;
     case 0x31: // \ numpad
       *tk_Fctn = state;

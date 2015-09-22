@@ -21,8 +21,6 @@ Holding modifiers is not recognized.
 
 Pressing both modifiers ( left & right shift for example, + a key like h does not produce H. )
 
-* Num lock is mapped backwards... :( need to fix that.
-
 Hot-plugging the keyboard doesn't work.
 
 ## Resources
