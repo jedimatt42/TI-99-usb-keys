@@ -21,8 +21,6 @@ Holding modifiers is not recognized.
 
 Pressing both modifiers ( left & right shift for example, + a key like h does not produce H. )
 
-Hot-plugging the keyboard doesn't work.
-
 ## Resources
 
 [Teensy 3.1](https://www.pjrc.com/teensy/teensy31.html)

@@ -1,3 +1,4 @@
+
 #include <hidboot.h>
 #include <usbhub.h>
 
@@ -717,18 +718,22 @@ HIDBoot<HID_PROTOCOL_KEYBOARD>    HidKeyboard(&Usb);
 
 KbdRptParser Prs;
 
+long lastGoodState;
+
 void setup()
 {
+  lastGoodState = millis();
   pinMode(14, OUTPUT);
   
   initPinModes();
   setColumnInterrupts();
   initData();
 
-  // Wait for keyboard to be up? This doesn't come close to working.
-  while (Usb.Init() == -1);
+  // Serial.begin(9600);
 
-  delay( 200 );
+  // Wait for keyboard to be up? This doesn't come close to working.
+  while (Usb.Init() == -1)
+    delay( 200 );
 
   HidKeyboard.SetReportParser(0, (HIDReportParser*)&Prs);
 }
@@ -737,8 +742,18 @@ void loop()
 {
   // Read USB input which updates the state of the in-memory keyboard matrix.
   Usb.Task();
+  long loopMillis = millis();
+  uint8_t state = Usb.getUsbTaskState();
+  if (state != USB_STATE_RUNNING) {
+    long rightnow = loopMillis;
+    if ( (rightnow - lastGoodState) > 5000 ) {
+      CPU_RESTART; 
+    }
+  } else {
+    lastGoodState = loopMillis;
+  }
   if (fctnEqualsTimestamp != 0) {
-    if ( (millis() - fctnEqualsTimestamp) > 150 ) {
+    if ( (loopMillis - fctnEqualsTimestamp) > 150 ) {
       fctnEqualsTimestamp = 0L;
       *tk_Fctn = 0;
       *tk_Equal = 0;
