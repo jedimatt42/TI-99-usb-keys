@@ -8,7 +8,7 @@
 // USB Keyboard input handling - mostly taken
 //   from the USB Host Boot Keyboard example.
 
-class KbdRptParser : public KeyboardReportParser
+class TiKbdRptParser : public KeyboardReportParser
 {
     int scrollLockState = 0;
     int numLockState = 0;
@@ -24,12 +24,12 @@ class KbdRptParser : public KeyboardReportParser
     boolean specialCombos(uint8_t mod, uint8_t key, int state);
 };
 
-void KbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after)
+void TiKbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after)
 {
   
 }
 
-void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
+void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
   if ( !specialCombos(mod, key, 1) ) {
     toggleMod(mod, 1);
@@ -37,7 +37,7 @@ void KbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
   }
 }
 
-void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
+void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
   if ( !specialCombos(mod, key, 0) ) {
     toggleMod(mod, 0);
@@ -45,7 +45,7 @@ void KbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
   }
 }
 
-boolean KbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state) 
+boolean TiKbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state) 
 {
   switch(mod) {
     case 32: // Shift
@@ -112,7 +112,7 @@ boolean KbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
   return false;
 }
 
-void KbdRptParser::toggleMod(uint8_t mod, int state)
+void TiKbdRptParser::toggleMod(uint8_t mod, int state)
 {
   switch(mod) {
     case 32:
@@ -130,7 +130,7 @@ void KbdRptParser::toggleMod(uint8_t mod, int state)
   }
 }
 
-void KbdRptParser::toggleKey(uint8_t key, int state)
+void TiKbdRptParser::toggleKey(uint8_t key, int state)
 {
     switch(key) {
     // ---------- First row of TI keyboard

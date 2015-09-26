@@ -13,16 +13,18 @@
 #define CPU_RESTART_VAL 0x5FA0004
 #define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
 
-#include "TiPins.h"
-
-#include "TiVirtualState.h"
-
-#include "TiKbdRptParser.h"
-
 // This is a hack to get keys released... 
 // A better solution would be to ensure all states are cleared
 // for any key.
 long fctnEqualsTimestamp = 0L;
+
+#include "TiPins.h"
+
+#include "TiVirtualState.h"
+
+#include "TiScan.h"
+
+#include "TiKbdRptParser.h"
 
 USB     Usb;
 USBHub     Hub(&Usb);
