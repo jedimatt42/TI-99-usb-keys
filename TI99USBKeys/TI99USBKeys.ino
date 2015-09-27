@@ -49,7 +49,7 @@ void setup()
 
   // Wait for keyboard to be up
   while (Usb.Init() == -1)
-    delay( 200 );
+    delay( 20 );
 
   HidKeyboard.SetReportParser(0, (HIDReportParser*)&Prs);
 }
