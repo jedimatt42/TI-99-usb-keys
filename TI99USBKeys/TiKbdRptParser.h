@@ -10,23 +10,38 @@
 
 class TiKbdRptParser : public KeyboardReportParser
 {
-    int scrollLockState = 0;
-    int numLockState = 0;
-  
   protected:
-    void OnControlKeysChanged(uint8_t before, uint8_t after);
-    void OnKeyDown	(uint8_t mod, uint8_t key);
-    void OnKeyUp	(uint8_t mod, uint8_t key);
+    virtual void OnControlKeysChanged(uint8_t before, uint8_t after);
+    virtual void OnKeyDown	(uint8_t mod, uint8_t key);
+    virtual void OnKeyUp	(uint8_t mod, uint8_t key);
 
   private:
     void toggleKey(uint8_t key, int state);
     void toggleMod(uint8_t mod, int state);
     boolean specialCombos(uint8_t mod, uint8_t key, int state);
+
+  public:
+    void setKeyLocks(HID* hid, boolean numLock, boolean capsLock, boolean scrollLock);
 };
+
+void TiKbdRptParser::setKeyLocks(HID* hid, boolean numLock, boolean capsLock, boolean scrollLock)
+{ 
+  if (numLock) {
+    kbdLockingKeys.kbdLeds.bmNumLock = 1;
+  }
+  if (capsLock) {
+    kbdLockingKeys.kbdLeds.bmCapsLock = 1;
+    *tk_Alpha = 1;
+  }
+  if (scrollLock) {
+    kbdLockingKeys.kbdLeds.bmScrollLock = 1;
+  }
+  hid->SetReport(0, 0, 2, 0, 1, &(kbdLockingKeys.bLeds));
+}
 
 void TiKbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after)
 {
-  
+
 }
 
 void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
@@ -45,12 +60,12 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
   }
 }
 
-boolean TiKbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state) 
+boolean TiKbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
 {
-  switch(mod) {
+  switch (mod) {
     case 32: // Shift
     case 2:
-      switch(key) {
+      switch (key) {
         case 0x35: // ` -> ~
           *tk_Fctn = state;
           *tk_W = state;
@@ -82,8 +97,8 @@ boolean TiKbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
       }
       break;
     case 64: // Alt
-    case 4: 
-      switch(key) {
+    case 4:
+      switch (key) {
         case 0x2E: // =   QUIT -- force high, and leave high on release.. released later in main loop.
           *tk_Fctn = 1;
           *tk_Equal = 1;
@@ -98,15 +113,9 @@ boolean TiKbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
       CPU_RESTART;
       break;
   }
-  switch(key) {
+  switch (key) {
     case 0x39: // caps lock
       *tk_Alpha = kbdLockingKeys.kbdLeds.bmCapsLock;
-      break;
-    case 0x47: // scroll lock
-      scrollLockState = kbdLockingKeys.kbdLeds.bmScrollLock;
-      break;
-    case 0x53: // num lock
-      numLockState = kbdLockingKeys.kbdLeds.bmNumLock;
       break;
   }
   return false;
@@ -114,7 +123,7 @@ boolean TiKbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
 
 void TiKbdRptParser::toggleMod(uint8_t mod, int state)
 {
-  switch(mod) {
+  switch (mod) {
     case 32:
     case 2:
       *tk_Shift = state;
@@ -122,7 +131,7 @@ void TiKbdRptParser::toggleMod(uint8_t mod, int state)
     case 64:
     case 4:
       *tk_Fctn = state;
-    break;
+      break;
     case 16:
     case 1:
       *tk_Ctrl = state;
@@ -132,7 +141,7 @@ void TiKbdRptParser::toggleMod(uint8_t mod, int state)
 
 void TiKbdRptParser::toggleKey(uint8_t key, int state)
 {
-    switch(key) {
+  switch (key) {
     // ---------- First row of TI keyboard
     case 0x1E:
       *tk_1 = state;
@@ -237,7 +246,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
     case 0x58:
       *tk_Enter = state;
       break;
-    // --------- Fourth Row 
+    // --------- Fourth Row
     case 0x1D:
       *tk_Z = state;
       break;
@@ -272,25 +281,25 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
     // ----------- PC Unique keys
     case 0x2A: // backspace
     case 0x50: // left arrow
-      if ( !scrollLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmScrollLock ) {
         *tk_Fctn = state;
       }
       *tk_S = state;
       break;
     case 0x4F: // right arrow
-      if ( !scrollLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmScrollLock ) {
         *tk_Fctn = state;
       }
       *tk_D = state;
       break;
     case 0x52: // up arrow
-      if ( !scrollLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmScrollLock ) {
         *tk_Fctn = state;
       }
       *tk_E = state;
       break;
     case 0x51: // down arrow
-      if ( !scrollLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmScrollLock ) {
         *tk_Fctn = state;
       }
       *tk_X = state;
@@ -368,7 +377,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       *tk_T = state;
       break;
     case 0x59: // 1 numpad
-      if ( !numLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
         // act like the end key
         *tk_Ctrl = state;
         *tk_V = state;
@@ -377,7 +386,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x5A: // 2 numpad
-      if ( !numLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
         *tk_Fctn = state;
         *tk_X = state;
       } else {
@@ -385,7 +394,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x5B: // 3 numpad
-      if (! numLockState ) {
+      if (! kbdLockingKeys.kbdLeds.bmNumLock ) {
         *tk_Fctn = state;
         *tk_4 = state;
       } else {
@@ -393,7 +402,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x5C: // 4 numpad
-      if ( !numLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
         *tk_Fctn = state;
         *tk_S = state;
       } else {
@@ -404,7 +413,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       *tk_5 = state;
       break;
     case 0x5E: // 6 numpad
-      if ( !numLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
         *tk_Fctn = state;
         *tk_D = state;
       } else {
@@ -412,7 +421,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x5F: // 7 numpad
-      if ( !numLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
         *tk_Ctrl = state;
         *tk_U = state;
       } else {
@@ -420,7 +429,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x60: // 8 numpad
-      if ( !numLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
         *tk_Fctn = state;
         *tk_E = state;
       } else {
@@ -428,7 +437,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x61: // 9 numpad
-      if ( !numLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
         *tk_Fctn = state;
         *tk_6 = state;
       } else {
@@ -436,7 +445,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x62: // 0 numpad
-      if ( !numLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
         *tk_Fctn = state;
         *tk_2 = state;
       } else {
@@ -444,7 +453,7 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       }
       break;
     case 0x63: // . numpad
-      if ( !numLockState ) {
+      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
         *tk_Fctn = state;
         *tk_1 = state;
       } else {

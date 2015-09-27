@@ -13,7 +13,11 @@
 #define CPU_RESTART_VAL 0x5FA0004
 #define CPU_RESTART (*CPU_RESTART_ADDR = CPU_RESTART_VAL);
 
-// This is a hack to get keys released... 
+#define NUMLOCK_STARTUP true
+#define CAPSLOCK_STARTUP true
+#define SCROLLLOCK_STARTUP false
+
+// This is a hack to get keys released...
 // A better solution would be to ensure all states are cleared
 // for any key.
 long fctnEqualsTimestamp = 0L;
@@ -33,19 +37,17 @@ HIDBoot<HID_PROTOCOL_KEYBOARD>    HidKeyboard(&Usb);
 TiKbdRptParser Prs;
 
 long lastGoodState;
+long firstBoot;
 
 void setup()
 {
-  lastGoodState = millis();
-  pinMode(14, OUTPUT);
+  firstBoot = lastGoodState = millis();
   
   initPinModes();
   setColumnInterrupts();
   initData();
 
-  // Serial.begin(9600);
-
-  // Wait for keyboard to be up? This doesn't come close to working.
+  // Wait for keyboard to be up
   while (Usb.Init() == -1)
     delay( 200 );
 
@@ -56,15 +58,22 @@ void loop()
 {
   // Read USB input which updates the state of the in-memory keyboard matrix.
   Usb.Task();
+
   long loopMillis = millis();
   uint8_t state = Usb.getUsbTaskState();
+  
   if (state != USB_STATE_RUNNING) {
     long rightnow = loopMillis;
     if ( (rightnow - lastGoodState) > 5000 ) {
-      CPU_RESTART; 
+      CPU_RESTART;
     }
   } else {
     lastGoodState = loopMillis;
+    if (firstBoot != 0) {
+      // Set numlock and capslock on, leave scroll lock off.
+      Prs.setKeyLocks(&HidKeyboard, NUMLOCK_STARTUP, CAPSLOCK_STARTUP, SCROLLLOCK_STARTUP);
+      firstBoot = 0; 
+    }
   }
   if (fctnEqualsTimestamp != 0) {
     if ( (loopMillis - fctnEqualsTimestamp) > 150 ) {
@@ -74,8 +83,5 @@ void loop()
       setRowOutputs(c0rows);
     }
   }
-  // For debugging the shift lock behavior. Turns an LED on if the virtual key matrix thinks shift is down.
-  // I'll leave this in a bit while I work on the ability to hold shift down!
-  digitalWrite(14, *tk_Shift ? HIGH : LOW );
 }
 
