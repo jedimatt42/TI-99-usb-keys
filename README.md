@@ -10,7 +10,7 @@ At this time, it is on a breadboard.
 
 [Pictures](https://goo.gl/photos/xhLKCTwCPuAeUbP86)
 
-The keyboard mapping is documented in: keymap.xlsx
+The keyboard mapping is documented in: keymap.xlsx (needs an update)
 
 ## Issues
 
@@ -20,6 +20,12 @@ This is only a development issue.
 Holding modifiers is not recognized.
 
 Pressing both modifiers ( left & right shift for example, + a key like h does not produce H. )
+
+## Design
+
+TIUSBKeys.pcb - A pcboard layout suitable for exposing the USB host port and programming port from the rear or left rear side of the TI console. Drops one gpio port, and rearranges numerous pin assignments to better layout the board.
+
+TIUSBKeys.sch - An expresspcb.com schematic file.
 
 ## Resources
 
