@@ -14,6 +14,8 @@ int c4rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int c5rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int c6rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
+int joy1rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
 // map symbols for the address of column/row pairs ( a key on the TI matrix )
 // column 0 (= space enter fctn shift ctrl)
 int* tk_Equal = c0rows;
@@ -70,6 +72,11 @@ int* tk_Z = c5rows+7;
 // column 6 (alpha_lock)
 int* tk_Alpha = c6rows+4;
 
+int* tj_Fire = joy1rows;
+int* tj_Left = joy1rows+1;
+int* tj_Right = joy1rows+2;
+int* tj_Down = joy1rows+3;
+int* tj_Up = joy1rows+4;
 
 void clearRow(int* rows)
 {
@@ -88,6 +95,7 @@ void initData()
   clearRow(c4rows);
   clearRow(c5rows);
   clearRow(c6rows);
+  clearRow(joy1rows);
 }
 
 

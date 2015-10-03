@@ -61,6 +61,11 @@ void onTiC6()
   setRowOutputs(c6rows);
 }
 
+void onTiJoy1()
+{
+  setRowOutputs(joy1rows);
+}
+
 void setColumnInterrupts()
 {
   int interruptMode = FALLING;
@@ -71,6 +76,8 @@ void setColumnInterrupts()
   attachInterrupt(ti_c4, onTiC4, interruptMode);
   attachInterrupt(ti_c5, onTiC5, interruptMode);
   attachInterrupt(ti_c6, onTiC6, interruptMode);
+
+  attachInterrupt(ti_joy1, onTiJoy1, interruptMode);
 }
 
 
