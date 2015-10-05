@@ -44,7 +44,6 @@ void setup()
   firstBoot = lastGoodState = millis();
   
   initPinModes();
-  setColumnInterrupts();
   initData();
 
   // Wait for keyboard to be up
