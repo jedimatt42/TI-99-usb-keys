@@ -74,14 +74,8 @@ void loop()
       Prs.setKeyLocks(&HidKeyboard, NUMLOCK_STARTUP, CAPSLOCK_STARTUP, SCROLLLOCK_STARTUP);
       firstBoot = 0; 
     }
-  }
-  if (fctnEqualsTimestamp != 0) {
-    if ( (loopMillis - fctnEqualsTimestamp) > 150 ) {
-      fctnEqualsTimestamp = 0L;
-      *tk_Fctn = 0;
-      *tk_Equal = 0;
-      setRowOutputs(c0rows);
-    }
+
+    handleTiScans();
   }
 }
 

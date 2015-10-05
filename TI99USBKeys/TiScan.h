@@ -26,53 +26,46 @@ void setRowOutputs(int* rows)
   setOutputPin(ti_r7, rows[i++]);
 }
 
-void onTiC0()
-{
-  setRowOutputs(c0rows);
+void clearOutputs() {
+  setOutputPin(ti_r0, 0);
+  setOutputPin(ti_r1, 0);
+  setOutputPin(ti_r2, 0);
+  setOutputPin(ti_r3, 0);
+  setOutputPin(ti_r4, 0);
+  setOutputPin(ti_r5, 0);
+  setOutputPin(ti_r6, 0);
+  setOutputPin(ti_r7, 0);
 }
 
-void onTiC1()
-{
-  setRowOutputs(c1rows);
-}
+int lastColumn = -1;
 
-void onTiC2()
-{
-  setRowOutputs(c2rows);
+void handleTiScans() {
+  if(digitalRead(ti_c0) == LOW && (lastColumn != ti_c0)) {
+    setRowOutputs(c0rows);
+    lastColumn = ti_c0;
+  } else if (digitalRead(ti_c1) == LOW && (lastColumn != ti_c1)) {
+    setRowOutputs(c1rows);
+    lastColumn = ti_c1;
+  } else if (digitalRead(ti_c2) == LOW && (lastColumn != ti_c2)) {
+    setRowOutputs(c2rows);
+    lastColumn = ti_c2;
+  } else if (digitalRead(ti_c3) == LOW && (lastColumn != ti_c3)) {
+    setRowOutputs(c3rows);
+    lastColumn = ti_c3;
+  } else if (digitalRead(ti_c4) == LOW && (lastColumn != ti_c4)) {
+    setRowOutputs(c4rows);
+    lastColumn = ti_c4;
+  } else if (digitalRead(ti_c5) == LOW && (lastColumn != ti_c5)) {
+    setRowOutputs(c5rows);
+    lastColumn = ti_c5;
+  } else if (digitalRead(ti_c6) == LOW && (lastColumn != ti_c6)) {
+    setRowOutputs(c6rows);
+    lastColumn = ti_c6;
+  } else {
+    clearOutputs();
+    lastColumn = -1;
+  }
 }
-
-void onTiC3()
-{
-  setRowOutputs(c3rows);
-}
-
-void onTiC4()
-{
-  setRowOutputs(c4rows);
-}
-
-void onTiC5()
-{
-  setRowOutputs(c5rows);
-}
-
-void onTiC6()
-{
-  setRowOutputs(c6rows);
-}
-
-void setColumnInterrupts()
-{
-  int interruptMode = FALLING;
-  attachInterrupt(ti_c0, onTiC0, interruptMode);
-  attachInterrupt(ti_c1, onTiC1, interruptMode);
-  attachInterrupt(ti_c2, onTiC2, interruptMode);
-  attachInterrupt(ti_c3, onTiC3, interruptMode);
-  attachInterrupt(ti_c4, onTiC4, interruptMode);
-  attachInterrupt(ti_c5, onTiC5, interruptMode);
-  attachInterrupt(ti_c6, onTiC6, interruptMode);
-}
-
 
 #endif
 
