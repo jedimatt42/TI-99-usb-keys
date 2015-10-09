@@ -26,51 +26,54 @@ void setRowOutputs(int* rows)
   setOutputPin(ti_r7, rows[i++]);
 }
 
-void onTiC0()
-{
-  setRowOutputs(c0rows);
+void clearOutputs() {
+  digitalWrite(ti_r0, HIGH);
+  digitalWrite(ti_r1, HIGH);
+  digitalWrite(ti_r2, HIGH);
+  digitalWrite(ti_r3, HIGH);
+  digitalWrite(ti_r4, HIGH);
+  digitalWrite(ti_r5, HIGH);
+  digitalWrite(ti_r6, HIGH);
+  digitalWrite(ti_r7, HIGH);
 }
 
-void onTiC1()
+void onTiColumnChange()
 {
-  setRowOutputs(c1rows);
-}
-
-void onTiC2()
-{
-  setRowOutputs(c2rows);
-}
-
-void onTiC3()
-{
-  setRowOutputs(c3rows);
-}
-
-void onTiC4()
-{
-  setRowOutputs(c4rows);
-}
-
-void onTiC5()
-{
-  setRowOutputs(c5rows);
-}
-
-void onTiC6()
-{
-  setRowOutputs(c6rows);
+  // Stop interrupts so I don't get two with each column change.
+  noInterrupts();
+  if (digitalRead(ti_c0) == LOW) {
+    setRowOutputs(c0rows);
+  } else if (digitalRead(ti_c1) == LOW) {
+    setRowOutputs(c1rows);
+  } else if (digitalRead(ti_c2) == LOW) {
+    setRowOutputs(c2rows);
+  } else if (digitalRead(ti_c3) == LOW) {
+    setRowOutputs(c3rows);
+  } else if (digitalRead(ti_c4) == LOW) {
+    setRowOutputs(c4rows);
+  } else if (digitalRead(ti_c5) == LOW) {
+    setRowOutputs(c5rows);
+  } else if (digitalRead(ti_c6) == LOW) {
+    // Technically the hardware 9901 lets this be low when
+    // the others are as well, but you cannot make sense
+    // of the keyboard that way.
+    setRowOutputs(c6rows);
+  } else {
+    clearOutputs();
+  }
+  interrupts();
 }
 
 void setColumnInterrupts()
 {
-  int interruptMode = FALLING;
-  attachInterrupt(ti_c0, onTiC0, interruptMode);
-  attachInterrupt(ti_c1, onTiC1, interruptMode);
-  attachInterrupt(ti_c2, onTiC2, interruptMode);
-  attachInterrupt(ti_c3, onTiC3, interruptMode);
-  attachInterrupt(ti_c4, onTiC4, interruptMode);
-  attachInterrupt(ti_c5, onTiC5, interruptMode);
-  attachInterrupt(ti_c6, onTiC6, interruptMode);
+  int interruptMode = CHANGE;
+  attachInterrupt(ti_c0, onTiColumnChange, interruptMode);
+  attachInterrupt(ti_c1, onTiColumnChange, interruptMode);
+  attachInterrupt(ti_c2, onTiColumnChange, interruptMode);
+  attachInterrupt(ti_c3, onTiColumnChange, interruptMode);
+  attachInterrupt(ti_c4, onTiColumnChange, interruptMode);
+  attachInterrupt(ti_c5, onTiColumnChange, interruptMode);
+  attachInterrupt(ti_c6, onTiColumnChange, interruptMode);
 }
 
 
