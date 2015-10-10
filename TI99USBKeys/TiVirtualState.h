@@ -89,6 +89,23 @@ void initData()
   clearRow(c6rows);
 }
 
+boolean isRowHandsFree(int* row)
+{
+  for (int i = 0; i < 8; i++) {
+    if (*(row+i)) return false;
+  }
+  return true;
+}
+
+boolean isHandsFree()
+{
+  return isRowHandsFree(c0rows)
+    && isRowHandsFree(c1rows)
+    && isRowHandsFree(c2rows)
+    && isRowHandsFree(c3rows)
+    && isRowHandsFree(c4rows)
+    && isRowHandsFree(c5rows);
+}
 
 #endif
 
