@@ -17,11 +17,6 @@
 #define CAPSLOCK_STARTUP true
 #define SCROLLLOCK_STARTUP false
 
-// This is a hack to get keys released...
-// A better solution would be to ensure all states are cleared
-// for any key.
-long fctnEqualsTimestamp = 0L;
-
 #include "TiPins.h"
 
 #include "TiVirtualState.h"
@@ -73,14 +68,6 @@ void loop()
       // Set numlock and capslock on, leave scroll lock off.
       Prs.setKeyLocks(&HidKeyboard, NUMLOCK_STARTUP, CAPSLOCK_STARTUP, SCROLLLOCK_STARTUP);
       firstBoot = 0; 
-    }
-  }
-  if (fctnEqualsTimestamp != 0) {
-    if ( (loopMillis - fctnEqualsTimestamp) > 150 ) {
-      fctnEqualsTimestamp = 0L;
-      *tk_Fctn = 0;
-      *tk_Equal = 0;
-      setRowOutputs(c0rows);
     }
   }
 }

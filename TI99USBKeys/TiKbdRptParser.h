@@ -99,10 +99,9 @@ boolean TiKbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
     case 64: // Alt
     case 4:
       switch (key) {
-        case 0x2E: // =   QUIT -- force high, and leave high on release.. released later in main loop.
+        case 0x2E: // =   QUIT 
           *tk_Fctn = 1;
           *tk_Equal = 1;
-          fctnEqualsTimestamp = millis();
           return true;
       }
       break;

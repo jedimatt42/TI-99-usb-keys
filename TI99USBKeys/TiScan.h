@@ -53,13 +53,12 @@ void onTiColumnChange()
     setRowOutputs(c4rows);
   } else if (digitalRead(ti_c5) == LOW) {
     setRowOutputs(c5rows);
-  } else if (digitalRead(ti_c6) == LOW) {
-    // Technically the hardware 9901 lets this be low when
-    // the others are as well, but you cannot make sense
-    // of the keyboard that way.
-    setRowOutputs(c6rows);
   } else {
-    clearOutputs();
+    if (digitalRead(ti_c6) == LOW) {
+      setRowOutputs(c6rows);
+    } else {
+      clearOutputs();
+    }
   }
   interrupts();
 }

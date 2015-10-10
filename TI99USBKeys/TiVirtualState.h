@@ -80,7 +80,6 @@ void clearRow(int* rows)
 
 void initData() 
 {
-  fctnEqualsTimestamp = 0L;
   clearRow(c0rows);
   clearRow(c1rows);
   clearRow(c2rows);
