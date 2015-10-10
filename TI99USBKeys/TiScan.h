@@ -26,6 +26,11 @@ void setRowOutputs(int* rows)
   setOutputPin(ti_r7, rows[i++]);
 }
 
+void setAlphaLock()
+{
+  setOutputPin(ti_r4, *tk_Alpha);
+}
+
 void clearOutputs() {
   digitalWrite(ti_r0, HIGH);
   digitalWrite(ti_r1, HIGH);
@@ -53,13 +58,12 @@ void onTiColumnChange()
     setRowOutputs(c4rows);
   } else if (digitalRead(ti_c5) == LOW) {
     setRowOutputs(c5rows);
-  } else {
-    if (digitalRead(ti_c6) == LOW) {
-      setRowOutputs(c6rows);
-    } else {
-      clearOutputs();
-    }
+  } 
+
+  if (digitalRead(ti_c6) == LOW) {
+    setAlphaLock();
   }
+  
   interrupts();
 }
 
