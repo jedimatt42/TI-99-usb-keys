@@ -70,11 +70,5 @@ void loop()
       firstBoot = 0; 
     }
   }
-
-  // Brute force, if no keys are pressed, except alpha-lock, then clear the output pins.
-
-  if (isHandsFree()) {
-    clearOutputs();
-  }
 }
 

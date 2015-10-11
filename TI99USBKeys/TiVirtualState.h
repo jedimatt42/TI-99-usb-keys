@@ -12,7 +12,8 @@ int c2rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int c3rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int c4rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int c5rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-int c6rows[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+// not really a row, just one value.
+int c6rows[8] = { 0 };
 
 // map symbols for the address of column/row pairs ( a key on the TI matrix )
 // column 0 (= space enter fctn shift ctrl)
@@ -68,7 +69,7 @@ int* tk_A = c5rows+5;
 int* tk_Q = c5rows+6;
 int* tk_Z = c5rows+7;
 // column 6 (alpha_lock)
-int* tk_Alpha = c6rows+4;
+int* tk_Alpha = c6rows;
 
 
 void clearRow(int* rows)
@@ -87,24 +88,6 @@ void initData()
   clearRow(c4rows);
   clearRow(c5rows);
   clearRow(c6rows);
-}
-
-boolean isRowHandsFree(int* row)
-{
-  for (int i = 0; i < 8; i++) {
-    if (*(row+i)) return false;
-  }
-  return true;
-}
-
-boolean isHandsFree()
-{
-  return isRowHandsFree(c0rows)
-    && isRowHandsFree(c1rows)
-    && isRowHandsFree(c2rows)
-    && isRowHandsFree(c3rows)
-    && isRowHandsFree(c4rows)
-    && isRowHandsFree(c5rows);
 }
 
 #endif
