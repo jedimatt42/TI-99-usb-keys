@@ -100,8 +100,8 @@ boolean TiKbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
     case 4:
       switch (key) {
         case 0x2E: // =   QUIT 
-          *tk_Fctn = 1;
-          *tk_Equal = 1;
+          *tk_Fctn = state;
+          *tk_Equal = state;
           return true;
       }
       break;

@@ -20,8 +20,6 @@ Pressing both modifiers ( left & right shift for example, + a key like h does no
 
 Parsec - using arrow keys DOWN (FCTN-x) while pressing Q for fire causes ship to go UP. Turning on scroll lock, so DOWN is just X and not FCTN X fixes the problem but requires user intervention.
 
-FCTN= leaves the computer stuck sometimes. 
-
 SHIFT-LOCK occurs when typing punctuation. Usually '?' ' ' (question-space) quickly will cause it.  I need to implement reference counting for modifiers. 
 
 Micro Pinball II - 1 key doens't work for left paddle. This happened after fixing 0 that used to stick. 
