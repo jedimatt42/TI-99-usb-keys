@@ -279,6 +279,9 @@ void TiKbdRptParser::toggleKey(uint8_t key, int state)
       break;
     // ----------- PC Unique keys
     case 0x2A: // backspace
+      *tk_Fctn = state;
+      *tk_S = state;
+      break;
     case 0x50: // left arrow
       if ( !kbdLockingKeys.kbdLeds.bmScrollLock ) {
         *tk_Fctn = state;

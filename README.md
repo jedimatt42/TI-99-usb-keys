@@ -22,7 +22,13 @@ Parsec - using arrow keys DOWN (FCTN-x) while pressing Q for fire causes ship to
 
 SHIFT-LOCK occurs when typing punctuation. Usually '?' ' ' (question-space) quickly will cause it.  I need to implement reference counting for modifiers. 
 
-Micro Pinball II - 1 key doens't work for left paddle. This happened after fixing 0 that used to stick. 
+Micro Pinball II - 1 key doens't work for left paddle. This happened after fixing 0 that used to stick. Actually this is intermittent.. sometimes it works just fine 1, 0 and =. 
+
+Ms. Pacman - the keyboard seemed to reboot... ? just using arrow keys... didn't do it after it settled down. No problem a day later..
+
+XB - 10 GOTO 10, run, F4-break doesn't work... 10 call key(1,k,s):: goto 10, works fine.
+  pressing c while still holding backspace acts like fctn c.
+
 
 ## Design
 
