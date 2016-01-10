@@ -19,6 +19,7 @@ class TiKbdRptParser : public KeyboardReportParser
   private:
     void updateModifier(uint8_t mask, uint8_t before, uint8_t after, int* tk);
     boolean handleSimple(uint8_t key, int state);
+    boolean handleFunction(uint8_t key, int state);
 
   public:
     TiKbdRptParser();
@@ -69,6 +70,7 @@ void TiKbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after)
 void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
   if (handleSimple(key, 1)) return;
+  if (mod == 0 && handleFunction(key, 1)) return;
 
   if (key == U_HYPHEN && mod == 0) {
     tk_press(tk_Shift);
@@ -100,6 +102,7 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
   if (handleSimple(key, 0)) return;
+  if (mod == 0 && handleFunction(key, 0)) return;
 
   if (key == U_HYPHEN && mod == 0) {
     tk_release(tk_Slash);
@@ -186,6 +189,28 @@ boolean TiKbdRptParser::handleSimple(uint8_t key, int state)
   return false;
 }
 
+#define FCASE(X, Y) case X: if(state) { tk_press(tk_Fctn); tk_press(Y); } else { tk_release(Y); tk_release(tk_Fctn); } return true
+#define CCASE(X, Y) case X: if(state) { tk_press(tk_Ctrl); tk_press(Y); } else { tk_release(Y); tk_release(tk_Ctrl); } return true
+
+boolean TiKbdRptParser::handleFunction(uint8_t key, int state)
+{
+  switch(key) {
+    FCASE(U_BACKSPACE,tk_S);
+    FCASE(U_F1,tk_1);
+    FCASE(U_F2,tk_2);
+    FCASE(U_F3,tk_3);
+    FCASE(U_F4,tk_4);
+    FCASE(U_F5,tk_5);
+    FCASE(U_F6,tk_6);
+    FCASE(U_F7,tk_7);
+    FCASE(U_F8,tk_8);
+    FCASE(U_F9,tk_9);
+    FCASE(U_F10,tk_0);
+    CCASE(U_F11,tk_1);
+    CCASE(U_F12,tk_2);
+  }
+  return false;
+}
 
 #endif
 
