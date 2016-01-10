@@ -124,6 +124,8 @@ boolean TiKbdRptParser::handleSimple(uint8_t key, int state)
     SCASE(U_PERIOD,tk_Period)
     SCASE(U_EQUAL,tk_Equal)
     SCASE(U_SEMICOLON,tk_Semicolon)
+    SCASE(U_SPACE,tk_Space)
+    SCASE(U_ENTER,tk_Enter)
   }
   return false;
 }
