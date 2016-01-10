@@ -3,6 +3,7 @@
 
 #include <hidboot.h>
 
+#include "USBCodes.h"
 
 //-----------------------------------------------
 // USB Keyboard input handling - mostly taken
@@ -16,10 +17,21 @@ class TiKbdRptParser : public KeyboardReportParser
     virtual void OnKeyUp	(uint8_t mod, uint8_t key);
 
   private:
-    void toggleKey(uint8_t key, int state);
-    void toggleMod(uint8_t mod, int state);
-    boolean specialCombos(uint8_t mod, uint8_t key, int state);
-    int specialActive = 0;
+    void updateModifier(uint8_t mask, uint8_t before, uint8_t after, int* tk);
+    boolean handleSimple(uint8_t key, int state);
+    boolean handleFunction(uint8_t key, int state);
+    boolean handleArrows(uint8_t key, int state);
+    boolean handleNumpad(uint8_t key, int state);
+    boolean backquote = false;
+    boolean backslash = false;
+    boolean doublequote = false;
+    boolean hyphen = false;
+    boolean pipe = false;
+    boolean question = false;
+    boolean quote = false;
+    boolean slash = false;
+    boolean tilde = false;
+    boolean underscore = false;
 
   public:
     TiKbdRptParser();
@@ -28,7 +40,6 @@ class TiKbdRptParser : public KeyboardReportParser
 
 TiKbdRptParser::TiKbdRptParser()
 {
-  specialActive = 0;
 }
 
 void TiKbdRptParser::setKeyLocks(HID* hid, boolean numLock, boolean capsLock, boolean scrollLock)
@@ -46,501 +57,292 @@ void TiKbdRptParser::setKeyLocks(HID* hid, boolean numLock, boolean capsLock, bo
   hid->SetReport(0, 0, 2, 0, 1, &(kbdLockingKeys.bLeds));
 }
 
+void TiKbdRptParser::updateModifier(uint8_t mask, uint8_t before, uint8_t after, int* tk)
+{
+  boolean wasMod = before & mask;
+  boolean isMod = after & mask;
+  if (wasMod && (!isMod)) {
+    tk_release(tk);
+  } else if (isMod && (!wasMod)) {
+    tk_press(tk);
+  }
+}
+
 void TiKbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after)
 {
-
+  updateModifier(U_LEFTSHIFT | U_RIGHTSHIFT, before, after, tk_Shift);
+  updateModifier(U_LEFTALT | U_RIGHTALT, before, after, tk_Fctn);
+  updateModifier(U_LEFTCTRL | U_RIGHTCTRL, before, after, tk_Ctrl);
 }
+
+#define ISSHIFT(X) ((U_LEFTSHIFT | U_RIGHTSHIFT) & X)
+#define ISALT(X) ((U_LEFTALT | U_RIGHTALT) & X)
+#define ISCTRL(X) ((U_LEFTCTRL | U_RIGHTCTRL) & X)
 
 void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
-  if (specialActive) { return; } // accept no new keys when a combo was down.
-  
-  if ( !specialCombos(mod, key, 1) ) {
-    toggleMod(mod, 1);
-    toggleKey(key, 1);
+  if (handleSimple(key, 1)) return;
+  if (mod == 0 && handleFunction(key, 1)) return;
+  if (mod == 0 && handleArrows(key, 1)) return;
+  if (mod == 0 && handleNumpad(key, 1)) return;
+
+  if (key == U_HYPHEN && mod == 0) {
+    tk_press(tk_Shift);
+    tk_press(tk_Slash);
+    hyphen = true;
+  } else if (key == U_HYPHEN && ISSHIFT(mod)) {
+    tk_release(tk_Shift);
+    tk_press(tk_Fctn);
+    tk_press(tk_U);
+    underscore = true;
+  } else if (key == U_SLASH && mod == 0) {
+    tk_press(tk_Slash);
+    slash = true;
+  } else if (key == U_SLASH && ISSHIFT(mod)) {
+    tk_press(tk_Fctn);
+    tk_press(tk_I);
+    question = true;
+  } else if (key == U_BACKSLASH && mod == 0) {
+    tk_press(tk_Fctn);
+    tk_press(tk_Z);
+    backslash = true;
+  } else if (key == U_BACKSLASH && ISSHIFT(mod)) {
+    tk_press(tk_Fctn);
+    tk_press(tk_A);
+    pipe = true;
+  } else if (key == U_BACKQUOTE && mod == 0) {
+    tk_press(tk_Fctn);
+    tk_press(tk_C);
+    backquote = true;
+  } else if (key == U_BACKQUOTE && ISSHIFT(mod)) {
+    tk_press(tk_Fctn);
+    tk_press(tk_W);
+    tilde = true;
+  } else if (key == U_QUOTE && mod == 0) {
+    tk_press(tk_Fctn);
+    tk_press(tk_O);
+    quote = true;
+  } else if (key == U_QUOTE && ISSHIFT(mod)) {
+    tk_press(tk_Fctn);
+    tk_press(tk_P);
+    doublequote = true;
   }
 }
 
 void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
-  if ( !specialCombos(mod, key, 0) ) {
-    toggleMod(mod, 0);
-    toggleKey(key, 0);
+  if (handleSimple(key, 0)) return;
+  if (mod == 0 && handleFunction(key, 0)) return;
+  if (mod == 0 && handleArrows(key, 0)) return;
+  if (mod == 0 && handleNumpad(key, 0)) return;
+
+  // This section below creates bugs! If the modifier is released before the
+  // primary key, then we don't releae the key in the TI keyboard.
+
+
+  if (key == U_HYPHEN) {
+    if (underscore) {
+      tk_release(tk_U);
+      tk_release(tk_Fctn);
+      tk_press(tk_Shift);
+      underscore = false;
+    } else {
+      tk_release(tk_Slash);
+      tk_release(tk_Shift);
+      hyphen = false;
+    }
+  } else if (key == U_SLASH) {
+    if (question) {
+      tk_release(tk_Fctn);
+      tk_release(tk_I);
+      question = false;
+    } else {
+      tk_release(tk_Slash);
+      slash = false;
+    }
+  } else if (key == U_BACKSLASH) {
+    if (pipe) {
+      tk_release(tk_A);
+      tk_release(tk_Fctn);
+      pipe = false;
+    } else {
+      tk_release(tk_Z);
+      tk_release(tk_Fctn);
+      backslash = false;
+    }
+  } else if (key == U_BACKQUOTE) {
+    if (tilde) {
+      tk_release(tk_W);
+      tk_release(tk_Fctn);
+      tilde = false;
+    } else {
+      tk_release(tk_C);
+      tk_release(tk_Fctn);
+      backquote = false;
+    }
+  } else if (key == U_QUOTE) {
+    if (doublequote) {
+      tk_release(tk_P);
+      tk_release(tk_Fctn);
+      doublequote = false;
+    } else {
+      tk_release(tk_O);
+      tk_release(tk_Fctn);
+      quote = false;
+    }
+  }
+   
+  else if (key == U_CAPSLOCK) {
+      *tk_Alpha = kbdLockingKeys.kbdLeds.bmCapsLock;
+  }
+
+  else if (key == U_DELETE && ISCTRL(mod) && ISALT(mod)) {
+    CPU_RESTART;
   }
 }
 
-boolean TiKbdRptParser::specialCombos(uint8_t mod, uint8_t key, int state)
-{  
-  switch (mod) {
-    case 32: // Shift
-    case 2:
-      switch (key) {
-        case 0x35: // ` -> ~
-          *tk_Fctn = state;
-          *tk_W = state;
-          specialActive = state;
-          return true;
-        case 0x2F: // [ -> {
-          *tk_Fctn = state;
-          *tk_F = state;
-          specialActive = state;
-          return true;
-        case 0x30: // ] -> }
-          *tk_Fctn = state;
-          *tk_G = state;
-          specialActive = state;
-          return true;
-        case 0x31: // \ -> |
-          *tk_Fctn = state;
-          *tk_A = state;
-          specialActive = state;
-          return true;
-        case 0x38: // / -> ?
-          *tk_Fctn = state;
-          *tk_I = state;
-          specialActive = state;
-          return true;
-        case 0x2D: // - -> _
-          *tk_Fctn = state;
-          *tk_U = state;
-          specialActive = state;
-          return true;
-        case 0x34: // ' -> "
-          *tk_Fctn = state;
-          *tk_P = state;
-          specialActive = state;
-          return true;
-      }
-      break;
-    case 64: // Alt
-    case 4:
-      switch (key) {
-        case 0x2E: // =   QUIT 
-          *tk_Fctn = state;
-          *tk_Equal = state;
-          specialActive = state;
-          return true;
-      }
-      break;
-    case 5: // Control-Alt
-    case 80:
-    case 65:
-    case 20:
-      CPU_RESTART;
-      break;
-  }
-  switch (key) {
-    case 0x39: // caps lock
-      *tk_Alpha = kbdLockingKeys.kbdLeds.bmCapsLock;
-      break;
+#define BCASE(X, Y) case X: if(state) { tk_press(Y); } else { tk_release(Y); } return true
+
+// Handle the keys that are a one to one mapping, with no modifier issues.
+boolean TiKbdRptParser::handleSimple(uint8_t key, int state)
+{
+  switch(key) {
+    BCASE(U_NUM1,tk_1);
+    BCASE(U_NUM2,tk_2);
+    BCASE(U_NUM3,tk_3);
+    BCASE(U_NUM4,tk_4);
+    BCASE(U_NUM5,tk_5);
+    BCASE(U_NUM6,tk_6);
+    BCASE(U_NUM7,tk_7);
+    BCASE(U_NUM8,tk_8);
+    BCASE(U_NUM9,tk_9);
+    BCASE(U_NUM0,tk_0);
+    BCASE(U_A,tk_A);
+    BCASE(U_B,tk_B);
+    BCASE(U_C,tk_C);
+    BCASE(U_D,tk_D);
+    BCASE(U_E,tk_E);
+    BCASE(U_F,tk_F);
+    BCASE(U_G,tk_G);
+    BCASE(U_H,tk_H);
+    BCASE(U_I,tk_I);
+    BCASE(U_J,tk_J);
+    BCASE(U_K,tk_K);
+    BCASE(U_L,tk_L);
+    BCASE(U_M,tk_M);
+    BCASE(U_N,tk_N);
+    BCASE(U_O,tk_O);
+    BCASE(U_P,tk_P);
+    BCASE(U_Q,tk_Q);
+    BCASE(U_R,tk_R);
+    BCASE(U_S,tk_S);
+    BCASE(U_T,tk_T);
+    BCASE(U_U,tk_U);
+    BCASE(U_V,tk_V);
+    BCASE(U_W,tk_W);
+    BCASE(U_X,tk_X);
+    BCASE(U_Y,tk_Y);
+    BCASE(U_Z,tk_Z);
+    BCASE(U_COMMA,tk_Comma);
+    BCASE(U_PERIOD,tk_Period);
+    BCASE(U_EQUAL,tk_Equal);
+    BCASE(U_SEMICOLON,tk_Semicolon);
+    BCASE(U_SPACE,tk_Space);
+    BCASE(U_ENTER,tk_Enter);
   }
   return false;
 }
 
-void TiKbdRptParser::toggleMod(uint8_t mod, int state)
+#define FCASE(X, Y) case X: if(state) { tk_press(tk_Fctn); tk_press(Y); } else { tk_release(Y); tk_release(tk_Fctn); } return true
+#define CCASE(X, Y) case X: if(state) { tk_press(tk_Ctrl); tk_press(Y); } else { tk_release(Y); tk_release(tk_Ctrl); } return true
+#define SCASE(X, Y) case X: if(state) { tk_press(tk_Shift); tk_press(Y); } else { tk_release(Y); tk_release(tk_Shift); } return true
+
+boolean TiKbdRptParser::handleFunction(uint8_t key, int state)
 {
-  switch (mod) {
-    case 32:
-    case 2:
-      *tk_Shift = state;
-      break;
-    case 64:
-    case 4:
-      *tk_Fctn = state;
-      break;
-    case 16:
-    case 1:
-      *tk_Ctrl = state;
-      break;
+  switch(key) {
+    FCASE(U_BACKSPACE,tk_S);
+    FCASE(U_F1,tk_1);
+    FCASE(U_F2,tk_2);
+    FCASE(U_F3,tk_3);
+    FCASE(U_F4,tk_4);
+    FCASE(U_F5,tk_5);
+    FCASE(U_F6,tk_6);
+    FCASE(U_F7,tk_7);
+    FCASE(U_F8,tk_8);
+    FCASE(U_F9,tk_9);
+    FCASE(U_F10,tk_0);
+    CCASE(U_F11,tk_1);
+    CCASE(U_F12,tk_2);
+    SCASE(U_NUMPAD_HYPHEN,tk_Slash);
+    SCASE(U_NUMPAD_STAR,tk_8);
+    BCASE(U_NUMSLASH,tk_Slash);
+    SCASE(U_NUMPAD_PLUS,tk_Equal);
+    BCASE(U_NUMPAD_ENTER,tk_Enter);
+    FCASE(U_BREAK,tk_4);
+    CCASE(U_HOME,tk_U);
+    CCASE(U_END,tk_V);
+    FCASE(U_TAB,tk_7);
+    FCASE(U_PGUP,tk_6);
+    FCASE(U_PGDN,tk_4);
+    FCASE(U_ESC,tk_9);
+    FCASE(U_DELETE,tk_1);
+    FCASE(U_INSERT,tk_2);
   }
+  return false;
 }
 
-void TiKbdRptParser::toggleKey(uint8_t key, int state)
+boolean TiKbdRptParser::handleArrows(uint8_t key, int state)
 {
-  switch (key) {
-    // ---------- First row of TI keyboard
-    case 0x1E:
-      *tk_1 = state;
-      break;
-    case 0x1F:
-      *tk_2 = state;
-      break;
-    case 0x20:
-      *tk_3 = state;
-      break;
-    case 0x21:
-      *tk_4 = state;
-      break;
-    case 0x22:
-      *tk_5 = state;
-      break;
-    case 0x23:
-      *tk_6 = state;
-      break;
-    case 0x24:
-      *tk_7 = state;
-      break;
-    case 0x25:
-      *tk_8 = state;
-      break;
-    case 0x26:
-      *tk_9 = state;
-      break;
-    case 0x27:
-      *tk_0 = state; // zero
-      break;
-    case 0x2E:
-      *tk_Equal = state;
-      break;
-    // ------ Second Row
-    case 0x14:
-      *tk_Q = state;
-      break;
-    case 0x1A:
-      *tk_W = state;
-      break;
-    case 0x08:
-      *tk_E = state;
-      break;
-    case 0x15:
-      *tk_R = state;
-      break;
-    case 0x17:
-      *tk_T = state;
-      break;
-    case 0x1C:
-      *tk_Y = state;
-      break;
-    case 0x18:
-      *tk_U = state;
-      break;
-    case 0x0C:
-      *tk_I = state;
-      break;
-    case 0x12:
-      *tk_O = state; // oh
-      break;
-    case 0x13:
-      *tk_P = state;
-      break;
-    case 0x38:
-    case 0x54:
-      *tk_Slash = state; // '/'
-      break;
-    // ---------- Third Row
-    case 0x04:
-      *tk_A = state;
-      break;
-    case 0x16:
-      *tk_S = state;
-      break;
-    case 0x07:
-      *tk_D = state;
-      break;
-    case 0x09:
-      *tk_F = state;
-      break;
-    case 0x0A:
-      *tk_G = state;
-      break;
-    case 0x0B:
-      *tk_H = state;
-      break;
-    case 0x0D:
-      *tk_J = state;
-      break;
-    case 0x0E:
-      *tk_K = state;
-      break;
-    case 0x0F:
-      *tk_L = state;
-      break;
-    case 0x33:
-      *tk_Semicolon = state;
-      break;
-    case 0x28:
-    case 0x58:
-      *tk_Enter = state;
-      break;
-    // --------- Fourth Row
-    case 0x1D:
-      *tk_Z = state;
-      break;
-    case 0x1B:
-      *tk_X = state;
-      break;
-    case 0x06:
-      *tk_C = state;
-      break;
-    case 0x19:
-      *tk_V = state;
-      break;
-    case 0x05:
-      *tk_B = state;
-      break;
-    case 0x11:
-      *tk_N = state;
-      break;
-    case 0x10:
-      *tk_M = state;
-      break;
-    case 0x36:
-      *tk_Comma = state;
-      break;
-    case 0x37:
-      *tk_Period = state;
-      break;
-    // ----------- Fifth Row
-    case 0x2C:
-      *tk_Space = state;
-      break;
-    // ----------- PC Unique keys
-    case 0x2A: // backspace
-      *tk_Fctn = state;
-      *tk_S = state;
-      specialActive = state;
-      break;
-    case 0x50: // left arrow
-      if ( !kbdLockingKeys.kbdLeds.bmScrollLock ) {
-        *tk_Fctn = state;
-        specialActive = state;
-      }
-      *tk_S = state;
-      break;
-    case 0x4F: // right arrow
-      if ( !kbdLockingKeys.kbdLeds.bmScrollLock ) {
-        *tk_Fctn = state;
-        specialActive = state;
-     }
-      *tk_D = state;
-      break;
-    case 0x52: // up arrow
-      if ( !kbdLockingKeys.kbdLeds.bmScrollLock ) {
-        *tk_Fctn = state;
-        specialActive = state;
-      }
-      *tk_E = state;
-      break;
-    case 0x51: // down arrow
-      if ( !kbdLockingKeys.kbdLeds.bmScrollLock ) {
-        *tk_Fctn = state;
-        specialActive = state;
-      }
-      *tk_X = state;
-      break;
-    case 0x3A: // F1
-    case 0x4C: // Delete
-      *tk_Fctn = state;
-      *tk_1 = state;
-      specialActive = state;
-      break;
-    case 0x3B: // F2
-    case 0x49: // Insert
-      *tk_Fctn = state;
-      *tk_2 = state;
-      specialActive = state;
-      break;
-    case 0x3C: // F3
-      *tk_Fctn = state;
-      *tk_3 = state;
-      specialActive = state;
-      break;
-    case 0x3D: // F4
-    case 0x48: // Break
-    case 0x4E: // PgDn
-      *tk_Fctn = state;
-      *tk_4 = state;
-      specialActive = state;
-      break;
-    case 0x3E: // F5
-      *tk_Fctn = state;
-      *tk_5 = state;
-      specialActive = state;
-      break;
-    case 0x3F: // F6
-    case 0x4B: // PgUp
-      *tk_Fctn = state;
-      *tk_6 = state;
-      specialActive = state;
-      break;
-    case 0x40: // F7
-    case 0x2B: // TAB
-      *tk_Fctn = state;
-      *tk_7 = state;
-      specialActive = state;
-      break;
-    case 0x41: // F8
-      *tk_Fctn = state;
-      *tk_8 = state;
-      specialActive = state;
-      break;
-    case 0x42: // F9
-    case 0x29: // Esc
-      *tk_Fctn = state;
-      *tk_9 = state;
-      specialActive = state;
-      break;
-    case 0x43: // F10
-      *tk_Fctn = state;
-      *tk_0 = state;
-      specialActive = state;
-      break;
-    case 0x44: // F11
-      *tk_Ctrl = state;
-      *tk_1 = state;
-      specialActive = state;
-      break;
-    case 0x45: // F12
-      *tk_Ctrl = state;
-      *tk_2 = state;
-      specialActive = state;
-      break;
-    case 0x35: // ` - backquote
-      *tk_Fctn = state;
-      *tk_C = state;
-      specialActive = state;
-      break;
-    case 0x2D: // hyphen
-    case 0x56: // hyphen numpad
-      *tk_Shift = state;
-      *tk_Slash = state;
-      specialActive = state;
-      break;
-    case 0x2F: // [
-      *tk_Fctn = state;
-      *tk_R = state;
-      specialActive = state;
-      break;
-    case 0x30: // ]
-      *tk_Fctn = state;
-      *tk_T = state;
-      specialActive = state;
-      break;
-    case 0x59: // 1 numpad
-      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
-        // act like the end key
-        *tk_Ctrl = state;
-        *tk_V = state;
-        specialActive = state;
-      } else {
-        *tk_1 = state;
-      }
-      break;
-    case 0x5A: // 2 numpad
-      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
-        *tk_Fctn = state;
-        *tk_X = state;
-        specialActive = state;
-      } else {
-        *tk_2 = state;
-      }
-      break;
-    case 0x5B: // 3 numpad
-      if (! kbdLockingKeys.kbdLeds.bmNumLock ) {
-        *tk_Fctn = state;
-        *tk_4 = state;
-        specialActive = state;
-     } else {
-        *tk_3 = state;
-      }
-      break;
-    case 0x5C: // 4 numpad
-      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
-        *tk_Fctn = state;
-        *tk_S = state;
-        specialActive = state;
-      } else {
-        *tk_4 = state;
-      }
-      break;
-    case 0x5D: // 5 numpad
-      *tk_5 = state;
-      break;
-    case 0x5E: // 6 numpad
-      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
-        *tk_Fctn = state;
-        *tk_D = state;
-        specialActive = state;
-      } else {
-        *tk_6 = state;
-      }
-      break;
-    case 0x5F: // 7 numpad
-      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
-        *tk_Ctrl = state;
-        *tk_U = state;
-        specialActive = state;
-      } else {
-        *tk_7 = state;
-      }
-      break;
-    case 0x60: // 8 numpad
-      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
-        *tk_Fctn = state;
-        *tk_E = state;
-        specialActive = state;
-      } else {
-        *tk_8 = state;
-      }
-      break;
-    case 0x61: // 9 numpad
-      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
-        *tk_Fctn = state;
-        *tk_6 = state;
-        specialActive = state;
-      } else {
-        *tk_9 = state;
-      }
-      break;
-    case 0x62: // 0 numpad
-      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
-        *tk_Fctn = state;
-        *tk_2 = state;
-        specialActive = state;
-      } else {
-        *tk_0 = state;
-      }
-      break;
-    case 0x63: // . numpad
-      if ( !kbdLockingKeys.kbdLeds.bmNumLock ) {
-        *tk_Fctn = state;
-        *tk_1 = state;
-        specialActive = state;
-      } else {
-        *tk_Period = state;
-      }
-      break;
-    case 0x31: // \ numpad
-      *tk_Fctn = state;
-      *tk_Z = state;
-      specialActive = state;
-      break;
-    case 0x55: // * numpad
-      *tk_Shift = state;
-      *tk_8 = state;
-      specialActive = state;
-      break;
-    case 0x57: // + numpad
-      *tk_Shift = state;
-      *tk_Equal = state;
-      specialActive = state;
-      break;
-    case 0x34: // '
-      *tk_Fctn = state;
-      *tk_O = state;
-      specialActive = state;
-      break;
-    case 0x4A: // Home
-      *tk_Ctrl = state;
-      *tk_U = state;
-      specialActive = state;
-      break;
-    case 0x4D: // End
-      *tk_Ctrl = state;
-      *tk_V = state;
-      specialActive = state;
-      break;
+  if (!kbdLockingKeys.kbdLeds.bmScrollLock) {
+    switch(key) {
+      FCASE(U_LEFTARROW,tk_S);
+      FCASE(U_RIGHTARROW,tk_D);
+      FCASE(U_UPARROW,tk_E);
+      FCASE(U_DOWNARROW,tk_X);     
+    }
+  } else {
+    switch(key) {
+      BCASE(U_LEFTARROW,tk_S);
+      BCASE(U_RIGHTARROW,tk_D);
+      BCASE(U_UPARROW,tk_E);
+      BCASE(U_DOWNARROW,tk_X);
+    }
   }
+  return false;
+}
+
+boolean TiKbdRptParser::handleNumpad(uint8_t key, int state)
+{
+  if (!kbdLockingKeys.kbdLeds.bmNumLock) {
+    switch(key) {
+      FCASE(U_NUMPAD_PERIOD,tk_1);
+      CCASE(U_NUMPAD_1,tk_V);
+      FCASE(U_NUMPAD_2,tk_X);
+      FCASE(U_NUMPAD_3,tk_4);
+      FCASE(U_NUMPAD_4,tk_S);
+      BCASE(U_NUMPAD_5,tk_5);
+      FCASE(U_NUMPAD_6,tk_D);
+      CCASE(U_NUMPAD_7,tk_U);
+      FCASE(U_NUMPAD_8,tk_E);
+      FCASE(U_NUMPAD_9,tk_6);
+      FCASE(U_NUMPAD_0,tk_2);
+    }
+  } else {
+    switch(key) {
+      BCASE(U_NUMPAD_PERIOD,tk_Period);
+      BCASE(U_NUMPAD_1,tk_1);
+      BCASE(U_NUMPAD_2,tk_2);
+      BCASE(U_NUMPAD_3,tk_3);
+      BCASE(U_NUMPAD_4,tk_4);
+      BCASE(U_NUMPAD_5,tk_5);
+      BCASE(U_NUMPAD_6,tk_6);
+      BCASE(U_NUMPAD_7,tk_7);
+      BCASE(U_NUMPAD_8,tk_8);
+      BCASE(U_NUMPAD_9,tk_9);
+      BCASE(U_NUMPAD_0,tk_0);
+    }
+  }
+  return false;
 }
 
 #endif

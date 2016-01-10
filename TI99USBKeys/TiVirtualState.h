@@ -107,5 +107,15 @@ boolean isHandsFree()
     && isRowHandsFree(c5rows);
 }
 
+void tk_release(int * key)
+{
+  *key = (*key - 1);
+}
+
+void tk_press(int * key)
+{
+  *key = (*key + 1);
+}
+
 #endif
 
