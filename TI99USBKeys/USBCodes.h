@@ -46,9 +46,6 @@
 #define U_TAB 0x2B
 #define U_ESC 0x29
 
-#define U_NUMSLASH 0x54
-#define U_NUMENTER 0x58
-
 #define U_CAPSLOCK 0x39
 
 #define U_LEFTSHIFT 32
@@ -81,9 +78,11 @@
 #define U_NUMPAD_0 0x62
 #define U_NUMPAD_PERIOD 0x63
 #define U_NUMPAD_SLASH 0x31
+#define U_NUMSLASH 0x54
 #define U_NUMPAD_STAR 0x55
 #define U_NUMPAD_HYPHEN 0x56
 #define U_NUMPAD_PLUS 0x57
+#define U_NUMPAD_ENTER 0x58
 
 #define U_Q 0x14
 #define U_W 0x1A

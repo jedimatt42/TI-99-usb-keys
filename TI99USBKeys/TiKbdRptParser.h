@@ -20,6 +20,7 @@ class TiKbdRptParser : public KeyboardReportParser
     void updateModifier(uint8_t mask, uint8_t before, uint8_t after, int* tk);
     boolean handleSimple(uint8_t key, int state);
     boolean handleFunction(uint8_t key, int state);
+    boolean handleArrows(uint8_t key, int state);
 
   public:
     TiKbdRptParser();
@@ -71,6 +72,7 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
   if (handleSimple(key, 1)) return;
   if (mod == 0 && handleFunction(key, 1)) return;
+  if (mod == 0 && handleArrows(key, 1)) return;
 
   if (key == U_HYPHEN && mod == 0) {
     tk_press(tk_Shift);
@@ -96,6 +98,12 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
   } else if (key == U_BACKQUOTE && ISSHIFT(mod)) {
     tk_press(tk_Fctn);
     tk_press(tk_W);
+  } else if (key == U_QUOTE && mod == 0) {
+    tk_press(tk_Fctn);
+    tk_press(tk_O);
+  } else if (key == U_QUOTE && ISSHIFT(mod)) {
+    tk_press(tk_Fctn);
+    tk_press(tk_P);
   }
 }
 
@@ -103,6 +111,10 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
   if (handleSimple(key, 0)) return;
   if (mod == 0 && handleFunction(key, 0)) return;
+  if (mod == 0 && handleArrows(key, 0)) return;
+
+  // This section below creates bugs! If the modifier is released before the
+  // primary key, then we don't releae the key in the TI keyboard.
 
   if (key == U_HYPHEN && mod == 0) {
     tk_release(tk_Slash);
@@ -128,6 +140,12 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
   } else if (key == U_BACKQUOTE && ISSHIFT(mod)) {
     tk_release(tk_W);
     tk_release(tk_Fctn);
+  } else if (key == U_QUOTE && mod == 0) {
+    tk_release(tk_O);
+    tk_release(tk_Fctn);
+  } else if (key == U_QUOTE && ISSHIFT(mod)) {
+    tk_release(tk_P);
+    tk_release(tk_Fctn);
   }
   
   switch(key) {
@@ -135,62 +153,67 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
       *tk_Alpha = kbdLockingKeys.kbdLeds.bmCapsLock;
       break;
   }
+
+  if (key == U_DELETE && ISCTRL(mod) && ISALT(mod)) {
+    CPU_RESTART;
+  }
 }
 
-#define SCASE(X, Y) case X: *Y = state; return true
+#define BCASE(X, Y) case X: if(state) { tk_press(Y); } else { tk_release(Y); } return true
 
 // Handle the keys that are a one to one mapping, with no modifier issues.
 boolean TiKbdRptParser::handleSimple(uint8_t key, int state)
 {
   switch(key) {
-    SCASE(U_NUM1,tk_1);
-    SCASE(U_NUM2,tk_2);
-    SCASE(U_NUM3,tk_3);
-    SCASE(U_NUM4,tk_4);
-    SCASE(U_NUM5,tk_5);
-    SCASE(U_NUM6,tk_6);
-    SCASE(U_NUM7,tk_7);
-    SCASE(U_NUM8,tk_8);
-    SCASE(U_NUM9,tk_9);
-    SCASE(U_NUM0,tk_0);
-    SCASE(U_A,tk_A);
-    SCASE(U_B,tk_B);
-    SCASE(U_C,tk_C);
-    SCASE(U_D,tk_D);
-    SCASE(U_E,tk_E);
-    SCASE(U_F,tk_F);
-    SCASE(U_G,tk_G);
-    SCASE(U_H,tk_H);
-    SCASE(U_I,tk_I);
-    SCASE(U_J,tk_J);
-    SCASE(U_K,tk_K);
-    SCASE(U_L,tk_L);
-    SCASE(U_M,tk_M);
-    SCASE(U_N,tk_N);
-    SCASE(U_O,tk_O);
-    SCASE(U_P,tk_P);
-    SCASE(U_Q,tk_Q);
-    SCASE(U_R,tk_R);
-    SCASE(U_S,tk_S);
-    SCASE(U_T,tk_T);
-    SCASE(U_U,tk_U);
-    SCASE(U_V,tk_V);
-    SCASE(U_W,tk_W);
-    SCASE(U_X,tk_X);
-    SCASE(U_Y,tk_Y);
-    SCASE(U_Z,tk_Z);
-    SCASE(U_COMMA,tk_Comma);
-    SCASE(U_PERIOD,tk_Period);
-    SCASE(U_EQUAL,tk_Equal);
-    SCASE(U_SEMICOLON,tk_Semicolon);
-    SCASE(U_SPACE,tk_Space);
-    SCASE(U_ENTER,tk_Enter);
+    BCASE(U_NUM1,tk_1);
+    BCASE(U_NUM2,tk_2);
+    BCASE(U_NUM3,tk_3);
+    BCASE(U_NUM4,tk_4);
+    BCASE(U_NUM5,tk_5);
+    BCASE(U_NUM6,tk_6);
+    BCASE(U_NUM7,tk_7);
+    BCASE(U_NUM8,tk_8);
+    BCASE(U_NUM9,tk_9);
+    BCASE(U_NUM0,tk_0);
+    BCASE(U_A,tk_A);
+    BCASE(U_B,tk_B);
+    BCASE(U_C,tk_C);
+    BCASE(U_D,tk_D);
+    BCASE(U_E,tk_E);
+    BCASE(U_F,tk_F);
+    BCASE(U_G,tk_G);
+    BCASE(U_H,tk_H);
+    BCASE(U_I,tk_I);
+    BCASE(U_J,tk_J);
+    BCASE(U_K,tk_K);
+    BCASE(U_L,tk_L);
+    BCASE(U_M,tk_M);
+    BCASE(U_N,tk_N);
+    BCASE(U_O,tk_O);
+    BCASE(U_P,tk_P);
+    BCASE(U_Q,tk_Q);
+    BCASE(U_R,tk_R);
+    BCASE(U_S,tk_S);
+    BCASE(U_T,tk_T);
+    BCASE(U_U,tk_U);
+    BCASE(U_V,tk_V);
+    BCASE(U_W,tk_W);
+    BCASE(U_X,tk_X);
+    BCASE(U_Y,tk_Y);
+    BCASE(U_Z,tk_Z);
+    BCASE(U_COMMA,tk_Comma);
+    BCASE(U_PERIOD,tk_Period);
+    BCASE(U_EQUAL,tk_Equal);
+    BCASE(U_SEMICOLON,tk_Semicolon);
+    BCASE(U_SPACE,tk_Space);
+    BCASE(U_ENTER,tk_Enter);
   }
   return false;
 }
 
 #define FCASE(X, Y) case X: if(state) { tk_press(tk_Fctn); tk_press(Y); } else { tk_release(Y); tk_release(tk_Fctn); } return true
 #define CCASE(X, Y) case X: if(state) { tk_press(tk_Ctrl); tk_press(Y); } else { tk_release(Y); tk_release(tk_Ctrl); } return true
+#define SCASE(X, Y) case X: if(state) { tk_press(tk_Shift); tk_press(Y); } else { tk_release(Y); tk_release(tk_Shift); } return true
 
 boolean TiKbdRptParser::handleFunction(uint8_t key, int state)
 {
@@ -208,9 +231,44 @@ boolean TiKbdRptParser::handleFunction(uint8_t key, int state)
     FCASE(U_F10,tk_0);
     CCASE(U_F11,tk_1);
     CCASE(U_F12,tk_2);
+    SCASE(U_NUMPAD_HYPHEN,tk_Slash);
+    SCASE(U_NUMPAD_STAR,tk_8);
+    BCASE(U_NUMSLASH,tk_Slash);
+    SCASE(U_NUMPAD_PLUS,tk_Equal);
+    BCASE(U_NUMPAD_ENTER,tk_Enter);
+    FCASE(U_BREAK,tk_4);
+    CCASE(U_HOME,tk_U);
+    CCASE(U_END,tk_V);
+    FCASE(U_TAB,tk_7);
+    FCASE(U_PGUP,tk_6);
+    FCASE(U_PGDN,tk_4);
+    FCASE(U_ESC,tk_9);
+    FCASE(U_DELETE,tk_1);
+    FCASE(U_INSERT,tk_2);
   }
   return false;
 }
+
+boolean TiKbdRptParser::handleArrows(uint8_t key, int state)
+{
+  if (!kbdLockingKeys.kbdLeds.bmScrollLock) {
+    switch(key) {
+      FCASE(U_LEFTARROW,tk_S);
+      FCASE(U_RIGHTARROW,tk_D);
+      FCASE(U_UPARROW,tk_E);
+      FCASE(U_DOWNARROW,tk_X);     
+    }
+  } else {
+    switch(key) {
+      BCASE(U_LEFTARROW,tk_S);
+      BCASE(U_RIGHTARROW,tk_D);
+      BCASE(U_UPARROW,tk_E);
+      BCASE(U_DOWNARROW,tk_X);
+    }
+  }
+  return false;
+}
+
 
 #endif
 
