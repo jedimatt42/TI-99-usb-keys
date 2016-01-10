@@ -21,6 +21,7 @@ class TiKbdRptParser : public KeyboardReportParser
     boolean handleSimple(uint8_t key, int state);
     boolean handleFunction(uint8_t key, int state);
     boolean handleArrows(uint8_t key, int state);
+    boolean handleNumpad(uint8_t key, int state);
     boolean backquote = false;
     boolean backslash = false;
     boolean doublequote = false;
@@ -83,6 +84,7 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
   if (handleSimple(key, 1)) return;
   if (mod == 0 && handleFunction(key, 1)) return;
   if (mod == 0 && handleArrows(key, 1)) return;
+  if (mod == 0 && handleNumpad(key, 1)) return;
 
   if (key == U_HYPHEN && mod == 0) {
     tk_press(tk_Shift);
@@ -132,6 +134,7 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
   if (handleSimple(key, 0)) return;
   if (mod == 0 && handleFunction(key, 0)) return;
   if (mod == 0 && handleArrows(key, 0)) return;
+  if (mod == 0 && handleNumpad(key, 0)) return;
 
   // This section below creates bugs! If the modifier is released before the
   // primary key, then we don't releae the key in the TI keyboard.
@@ -308,6 +311,39 @@ boolean TiKbdRptParser::handleArrows(uint8_t key, int state)
   return false;
 }
 
+boolean TiKbdRptParser::handleNumpad(uint8_t key, int state)
+{
+  if (!kbdLockingKeys.kbdLeds.bmNumLock) {
+    switch(key) {
+      FCASE(U_NUMPAD_PERIOD,tk_1);
+      CCASE(U_NUMPAD_1,tk_V);
+      FCASE(U_NUMPAD_2,tk_X);
+      FCASE(U_NUMPAD_3,tk_4);
+      FCASE(U_NUMPAD_4,tk_S);
+      BCASE(U_NUMPAD_5,tk_5);
+      FCASE(U_NUMPAD_6,tk_D);
+      CCASE(U_NUMPAD_7,tk_U);
+      FCASE(U_NUMPAD_8,tk_E);
+      FCASE(U_NUMPAD_9,tk_6);
+      FCASE(U_NUMPAD_0,tk_2);
+    }
+  } else {
+    switch(key) {
+      BCASE(U_NUMPAD_PERIOD,tk_Period);
+      BCASE(U_NUMPAD_1,tk_1);
+      BCASE(U_NUMPAD_2,tk_2);
+      BCASE(U_NUMPAD_3,tk_3);
+      BCASE(U_NUMPAD_4,tk_4);
+      BCASE(U_NUMPAD_5,tk_5);
+      BCASE(U_NUMPAD_6,tk_6);
+      BCASE(U_NUMPAD_7,tk_7);
+      BCASE(U_NUMPAD_8,tk_8);
+      BCASE(U_NUMPAD_9,tk_9);
+      BCASE(U_NUMPAD_0,tk_0);
+    }
+  }
+  return false;
+}
 
 #endif
 
