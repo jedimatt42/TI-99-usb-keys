@@ -21,6 +21,16 @@ class TiKbdRptParser : public KeyboardReportParser
     boolean handleSimple(uint8_t key, int state);
     boolean handleFunction(uint8_t key, int state);
     boolean handleArrows(uint8_t key, int state);
+    boolean backquote = false;
+    boolean backslash = false;
+    boolean doublequote = false;
+    boolean hyphen = false;
+    boolean pipe = false;
+    boolean question = false;
+    boolean quote = false;
+    boolean slash = false;
+    boolean tilde = false;
+    boolean underscore = false;
 
   public:
     TiKbdRptParser();
@@ -77,33 +87,43 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
   if (key == U_HYPHEN && mod == 0) {
     tk_press(tk_Shift);
     tk_press(tk_Slash);
+    hyphen = true;
   } else if (key == U_HYPHEN && ISSHIFT(mod)) {
     tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_U);
-  } else if (key == U_SLASH && !ISSHIFT(mod)) {
+    underscore = true;
+  } else if (key == U_SLASH && mod == 0) {
     tk_press(tk_Slash);
+    slash = true;
   } else if (key == U_SLASH && ISSHIFT(mod)) {
     tk_press(tk_Fctn);
     tk_press(tk_I);
-  } else if (key == U_BACKSLASH && !ISSHIFT(mod)) {
+    question = true;
+  } else if (key == U_BACKSLASH && mod == 0) {
     tk_press(tk_Fctn);
     tk_press(tk_Z);
+    backslash = true;
   } else if (key == U_BACKSLASH && ISSHIFT(mod)) {
     tk_press(tk_Fctn);
     tk_press(tk_A);
-  } else if (key == U_BACKQUOTE && !ISSHIFT(mod)) {
+    pipe = true;
+  } else if (key == U_BACKQUOTE && mod == 0) {
     tk_press(tk_Fctn);
     tk_press(tk_C);
+    backquote = true;
   } else if (key == U_BACKQUOTE && ISSHIFT(mod)) {
     tk_press(tk_Fctn);
     tk_press(tk_W);
+    tilde = true;
   } else if (key == U_QUOTE && mod == 0) {
     tk_press(tk_Fctn);
     tk_press(tk_O);
+    quote = true;
   } else if (key == U_QUOTE && ISSHIFT(mod)) {
     tk_press(tk_Fctn);
     tk_press(tk_P);
+    doublequote = true;
   }
 }
 
@@ -116,45 +136,64 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
   // This section below creates bugs! If the modifier is released before the
   // primary key, then we don't releae the key in the TI keyboard.
 
-  if (key == U_HYPHEN && mod == 0) {
-    tk_release(tk_Slash);
-    tk_release(tk_Shift);
-  } else if (key == U_HYPHEN && ISSHIFT(mod)) {
-    tk_release(tk_U);
-    tk_release(tk_Fctn);
-    tk_press(tk_Shift);
-  } else if (key == U_SLASH && !ISSHIFT(mod)) {
-    tk_release(tk_Slash);
-  } else if (key == U_SLASH && ISSHIFT(mod)) {
-    tk_release(tk_I);
-    tk_release(tk_Fctn);
-  } else if (key == U_BACKSLASH && !ISSHIFT(mod)) {
-    tk_release(tk_Z);
-    tk_release(tk_Fctn);
-  } else if (key == U_BACKSLASH && ISSHIFT(mod)) {
-    tk_release(tk_A);
-    tk_release(tk_Fctn);
-  } else if (key == U_BACKQUOTE && !ISSHIFT(mod)) {
-    tk_release(tk_C);
-    tk_release(tk_Fctn);
-  } else if (key == U_BACKQUOTE && ISSHIFT(mod)) {
-    tk_release(tk_W);
-    tk_release(tk_Fctn);
-  } else if (key == U_QUOTE && mod == 0) {
-    tk_release(tk_O);
-    tk_release(tk_Fctn);
-  } else if (key == U_QUOTE && ISSHIFT(mod)) {
-    tk_release(tk_P);
-    tk_release(tk_Fctn);
+
+  if (key == U_HYPHEN) {
+    if (underscore) {
+      tk_release(tk_U);
+      tk_release(tk_Fctn);
+      tk_press(tk_Shift);
+      underscore = false;
+    } else {
+      tk_release(tk_Slash);
+      tk_release(tk_Shift);
+      hyphen = false;
+    }
+  } else if (key == U_SLASH) {
+    if (question) {
+      tk_release(tk_Fctn);
+      tk_release(tk_I);
+      question = false;
+    } else {
+      tk_release(tk_Slash);
+      slash = false;
+    }
+  } else if (key == U_BACKSLASH) {
+    if (pipe) {
+      tk_release(tk_A);
+      tk_release(tk_Fctn);
+      pipe = false;
+    } else {
+      tk_release(tk_Z);
+      tk_release(tk_Fctn);
+      backslash = false;
+    }
+  } else if (key == U_BACKQUOTE) {
+    if (tilde) {
+      tk_release(tk_W);
+      tk_release(tk_Fctn);
+      tilde = false;
+    } else {
+      tk_release(tk_C);
+      tk_release(tk_Fctn);
+      backquote = false;
+    }
+  } else if (key == U_QUOTE) {
+    if (doublequote) {
+      tk_release(tk_P);
+      tk_release(tk_Fctn);
+      doublequote = false;
+    } else {
+      tk_release(tk_O);
+      tk_release(tk_Fctn);
+      quote = false;
+    }
   }
-  
-  switch(key) {
-    case U_CAPSLOCK:
+   
+  else if (key == U_CAPSLOCK) {
       *tk_Alpha = kbdLockingKeys.kbdLeds.bmCapsLock;
-      break;
   }
 
-  if (key == U_DELETE && ISCTRL(mod) && ISALT(mod)) {
+  else if (key == U_DELETE && ISCTRL(mod) && ISALT(mod)) {
     CPU_RESTART;
   }
 }
