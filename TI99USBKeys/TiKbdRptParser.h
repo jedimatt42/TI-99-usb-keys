@@ -88,6 +88,12 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
   } else if (key == U_BACKSLASH && ISSHIFT(mod)) {
     tk_press(tk_Fctn);
     tk_press(tk_A);
+  } else if (key == U_BACKQUOTE && !ISSHIFT(mod)) {
+    tk_press(tk_Fctn);
+    tk_press(tk_C);
+  } else if (key == U_BACKQUOTE && ISSHIFT(mod)) {
+    tk_press(tk_Fctn);
+    tk_press(tk_W);
   }
 }
 
@@ -112,6 +118,12 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
     tk_release(tk_Fctn);
   } else if (key == U_BACKSLASH && ISSHIFT(mod)) {
     tk_release(tk_A);
+    tk_release(tk_Fctn);
+  } else if (key == U_BACKQUOTE && !ISSHIFT(mod)) {
+    tk_release(tk_C);
+    tk_release(tk_Fctn);
+  } else if (key == U_BACKQUOTE && ISSHIFT(mod)) {
+    tk_release(tk_W);
     tk_release(tk_Fctn);
   }
   
