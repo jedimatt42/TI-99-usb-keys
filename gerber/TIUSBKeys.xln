@@ -3,8 +3,8 @@ M48
 ; Format:               Excellon NC Drill Ascii
 ; This File Name:       TIUSBKeys.xln
 ; Source File Name:     TIUSBKeys.rrb
-; Unique ID:            843cec37-0856-41c4-805a-d10cf3bc8157
-; Generated Date:       Friday, 01 January 2016 15:42:11
+; Unique ID:            24e25263-e91d-4db0-bbc5-79a7aba35fac
+; Generated Date:       Saturday, 23 January 2016 13:07:51
 ;
 ; Created Using:        Robot Room Copper Connection v2.9.5573
 ; Software Contact:     http://www.robotroom.com/CopperConnection/Support.aspx
@@ -79,8 +79,6 @@ Y008000
 Y007000
 Y006000
 Y005000
-X015500Y003000
-X013500
 T03
 X003000Y001500
 X004000

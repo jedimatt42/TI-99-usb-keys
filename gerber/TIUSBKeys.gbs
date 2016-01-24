@@ -3,8 +3,8 @@ G04 Format:               Gerber RS-274X*
 G04 Layer:                BottomSolderMask*
 G04 This File Name:       TIUSBKeys.gbs*
 G04 Source File Name:     TIUSBKeys.rrb*
-G04 Unique ID:            843cec37-0856-41c4-805a-d10cf3bc8157*
-G04 Generated Date:       Friday, 01 January 2016 15:42:11*
+G04 Unique ID:            24e25263-e91d-4db0-bbc5-79a7aba35fac*
+G04 Generated Date:       Saturday, 23 January 2016 13:07:51*
 G04*
 G04 Created Using:        Robot Room Copper Connection v2.9.5573*
 G04 Software Contact:     http://www.robotroom.com/CopperConnection/Support.aspx*
@@ -82,9 +82,7 @@ Y19000D03*
 Y20000D03*
 Y21000D03*
 X10000Y6000D03*
-X13500Y3000D03*
-X15500D03*
-X10000Y5000D03*
+Y5000D03*
 D12*
 X3000Y2500D03*
 X4000Y1500D03*
