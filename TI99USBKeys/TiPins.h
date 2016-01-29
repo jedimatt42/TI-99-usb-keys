@@ -21,7 +21,7 @@ int ti_r5 = 17; // key_cable_pin_3  (shift S D F G A)
 int ti_r3 = 15; // key_cable_pin_2  (9 8 7 6 0)
 int ti_r2 = 16; // key_cable_pin_1  (enter O I U Y P)
 
-int ti_joy1 = 0;
+int ti_g3 = 0;
 int ti_g2 = 1;
 int ti_g1 = 23;
 
@@ -61,6 +61,12 @@ void initOutputs()
   digitalWrite(ti_r5,HIGH);
   digitalWrite(ti_r6,HIGH);
   digitalWrite(ti_r7,HIGH);
+  pinMode(ti_g1, outputMode);
+  pinMode(ti_g2, outputMode);
+  pinMode(ti_g3, outputMode);
+  digitalWrite(ti_g1,HIGH);
+  digitalWrite(ti_g2,HIGH);
+  digitalWrite(ti_g3,HIGH);
 }
 
 void initPinModes() 

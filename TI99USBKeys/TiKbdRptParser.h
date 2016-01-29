@@ -199,6 +199,22 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
   else if (key == U_DELETE && ISCTRL(mod) && ISALT(mod)) {
     CPU_RESTART;
   }
+
+  else if (key == U_F10 && ISCTRL(mod) && ISALT(mod)) {
+    digitalWrite(ti_g1,LOW);
+    delay(25);
+    digitalWrite(ti_g1,HIGH);
+  }
+  else if (key == U_F11 && ISCTRL(mod) && ISALT(mod)) {
+    digitalWrite(ti_g2,LOW);
+    delay(25);
+    digitalWrite(ti_g2,HIGH);
+  }
+  else if (key == U_F12 && ISCTRL(mod) && ISALT(mod)) {
+    digitalWrite(ti_g3,LOW);
+    delay(25);
+    digitalWrite(ti_g3,HIGH);
+  }
 }
 
 #define BCASE(X, Y) case X: if(state) { tk_press(Y); } else { tk_release(Y); } return true
