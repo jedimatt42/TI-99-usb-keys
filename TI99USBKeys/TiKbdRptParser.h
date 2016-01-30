@@ -32,6 +32,10 @@ class TiKbdRptParser : public KeyboardReportParser
     boolean slash = false;
     boolean tilde = false;
     boolean underscore = false;
+    boolean opensquare = false;
+    boolean closesquare = false;
+    boolean opencurly = false;
+    boolean closecurly = false;
 
   public:
     TiKbdRptParser();
@@ -81,10 +85,18 @@ void TiKbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after)
 
 void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
-  if (handleSimple(key, 1)) return;
-  if (mod == 0 && handleFunction(key, 1)) return;
-  if (mod == 0 && handleArrows(key, 1)) return;
-  if (mod == 0 && handleNumpad(key, 1)) return;
+  if (handleSimple(key, 1)) {
+    return;
+  }
+  if (mod == 0 && handleFunction(key, 1)) {
+    return;
+  }
+  if (mod == 0 && handleArrows(key, 1)) {
+    return;
+  }
+  if (mod == 0 && handleNumpad(key, 1)) {
+    return;
+  }
 
   if (key == U_HYPHEN && mod == 0) {
     tk_press(tk_Shift);
@@ -126,15 +138,39 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
     tk_press(tk_Fctn);
     tk_press(tk_P);
     doublequote = true;
+  } else if (key == U_OPENSQUARE && mod == 0) {
+    tk_press(tk_Fctn);
+    tk_press(tk_R);
+    opensquare = true;
+  } else if (key == U_OPENSQUARE && ISSHIFT(mod)) {
+    tk_press(tk_Fctn);
+    tk_press(tk_F);
+    opencurly = true;
+  } else if (key == U_CLOSESQUARE && mod == 0) {
+    tk_press(tk_Fctn);
+    tk_press(tk_T);
+    closesquare = true;
+  } else if (key == U_CLOSESQUARE && ISSHIFT(mod)) {
+    tk_press(tk_Fctn);
+    tk_press(tk_G);
+    closecurly = true;
   }
 }
 
 void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
-  if (handleSimple(key, 0)) return;
-  if (mod == 0 && handleFunction(key, 0)) return;
-  if (mod == 0 && handleArrows(key, 0)) return;
-  if (mod == 0 && handleNumpad(key, 0)) return;
+  if (handleSimple(key, 0)) {
+    return;
+  }
+  if (mod == 0 && handleFunction(key, 0)) {
+    return;
+  }
+  if (mod == 0 && handleArrows(key, 0)) {
+    return;
+  }
+  if (mod == 0 && handleNumpad(key, 0)) {
+    return;
+  }
 
   // This section below creates bugs! If the modifier is released before the
   // primary key, then we don't releae the key in the TI keyboard.
@@ -189,6 +225,26 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
       tk_release(tk_O);
       tk_release(tk_Fctn);
       quote = false;
+    }
+  } else if (key == U_OPENSQUARE) {
+    if (opensquare) {
+      tk_release(tk_R);
+      tk_release(tk_Fctn);
+      opensquare = false;
+    } else {
+      tk_release(tk_F);
+      tk_release(tk_Fctn);
+      opencurly = false;
+    }
+  } else if (key == U_CLOSESQUARE) {
+    if (closesquare) {
+      tk_release(tk_T);
+      tk_release(tk_Fctn);
+      closesquare = false;
+    } else {
+      tk_release(tk_G);
+      tk_release(tk_Fctn);
+      closecurly = false;
     }
   }
    

@@ -61,6 +61,7 @@ void initOutputs()
   digitalWrite(ti_r5,HIGH);
   digitalWrite(ti_r6,HIGH);
   digitalWrite(ti_r7,HIGH);
+
   pinMode(ti_g1, outputMode);
   pinMode(ti_g2, outputMode);
   pinMode(ti_g3, outputMode);
