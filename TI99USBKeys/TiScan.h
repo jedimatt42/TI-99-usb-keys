@@ -15,15 +15,14 @@ void setOutputPin(int pin, int state)
 // Given a columns set of switches, set each output pin accordingly.
 void setRowOutputs(int* rows)
 {
-  int i = 0;
-  setOutputPin(ti_r0, rows[i++]);
-  setOutputPin(ti_r1, rows[i++]);
-  setOutputPin(ti_r2, rows[i++]);
-  setOutputPin(ti_r3, rows[i++]);
-  setOutputPin(ti_r4, rows[i++]);
-  setOutputPin(ti_r5, rows[i++]);
-  setOutputPin(ti_r6, rows[i++]);
-  setOutputPin(ti_r7, rows[i++]);
+  setOutputPin(ti_r0, rows[0]);
+  setOutputPin(ti_r1, rows[1]);
+  setOutputPin(ti_r2, rows[2]);
+  setOutputPin(ti_r3, rows[3]);
+  setOutputPin(ti_r4, rows[4]);
+  setOutputPin(ti_r5, rows[5]);
+  setOutputPin(ti_r6, rows[6]);
+  setOutputPin(ti_r7, rows[7]);
 }
 
 void setAlphaLock()
