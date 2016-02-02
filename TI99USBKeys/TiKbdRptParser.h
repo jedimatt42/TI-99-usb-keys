@@ -267,18 +267,24 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
   }
 
   else if (key == U_F10 && ISCTRL(mod) && ISALT(mod)) {
+    pinMode(ti_g1,OUTPUT_OPENDRAIN);
     digitalWrite(ti_g1,LOW);
     delay(25);
+    pinMode(ti_g1,INPUT_PULLUP);
     digitalWrite(ti_g1,HIGH);
   }
   else if (key == U_F11 && ISCTRL(mod) && ISALT(mod)) {
+    pinMode(ti_g1,OUTPUT_OPENDRAIN);
     digitalWrite(ti_g2,LOW);
     delay(25);
+    pinMode(ti_g2,INPUT_PULLUP);
     digitalWrite(ti_g2,HIGH);
   }
   else if (key == U_F12 && ISCTRL(mod) && ISALT(mod)) {
+    pinMode(ti_g1,OUTPUT_OPENDRAIN);
     digitalWrite(ti_g3,LOW);
     delay(25);
+    pinMode(ti_g3,INPUT_PULLUP);
     digitalWrite(ti_g3,HIGH);
   } 
 }
