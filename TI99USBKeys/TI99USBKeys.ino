@@ -73,7 +73,7 @@ void loop()
 
   // Brute force, if no keys are pressed, except alpha-lock, then clear the output pins.
   if (isHandsFree()) {
-    clearOutputs();
+    clearOutputs(0);
   }
 }
 
