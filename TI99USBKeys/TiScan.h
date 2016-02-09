@@ -45,6 +45,9 @@ void onTiColumnChange()
 {
   // Stop interrupts so I don't get two with each column change.
   noInterrupts();
+
+  // The outputs from the TI 9901 go to a octal decoder, so only 
+  // one of these can be LOW at a time. 
   if (digitalRead(ti_c0) == LOW) {
     setRowOutputs(c0rows);
   } else if (digitalRead(ti_c1) == LOW) {
@@ -59,10 +62,12 @@ void onTiColumnChange()
     setRowOutputs(c5rows);
   } 
 
+  // The column for the alpha-lock is not controlled by the
+  // octal decoder that the rest of the keyboard is controlled by.
   if (digitalRead(ti_c6) == LOW) {
     setAlphaLock();
   }
-  
+
   interrupts();
 }
 
