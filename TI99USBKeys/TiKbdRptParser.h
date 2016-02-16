@@ -86,6 +86,9 @@ void TiKbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after)
 void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
   if (handleSimple(key, 1)) {
+    if(key == U_EQUAL && ISALT(mod)) {
+      forceFctnEquals(1);
+    }
     return;
   }
   if (mod == 0 && handleFunction(key, 1)) {
@@ -165,11 +168,7 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
   if (handleSimple(key, 0)) {
     if(key == U_EQUAL && ISALT(mod)) {
-      noInterrupts();
-      forceFctnEquals(1);
-      delay(100);
       forceFctnEquals(0);
-      interrupts();
     }
     return;
   }
