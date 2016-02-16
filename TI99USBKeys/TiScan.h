@@ -80,6 +80,10 @@ void setColumnInterrupts()
   attachInterrupt(ti_c6, onTiColumnChange, interruptMode);
 }
 
+void forceFctnEquals(int state) {
+  setOutputPin(ti_r0, state);
+  setOutputPin(ti_r4, state);
+}
 
 #endif
 
