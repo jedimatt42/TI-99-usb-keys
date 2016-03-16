@@ -114,6 +114,7 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
     tk_press(tk_Slash);
     slash = true;
   } else if (key == U_SLASH && ISSHIFT(mod)) {
+    tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_I);
     question = true;
@@ -122,6 +123,7 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
     tk_press(tk_Z);
     backslash = true;
   } else if (key == U_BACKSLASH && ISSHIFT(mod)) {
+    tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_A);
     pipe = true;
@@ -130,6 +132,7 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
     tk_press(tk_C);
     backquote = true;
   } else if (key == U_BACKQUOTE && ISSHIFT(mod)) {
+    tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_W);
     tilde = true;
@@ -138,6 +141,7 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
     tk_press(tk_O);
     quote = true;
   } else if (key == U_QUOTE && ISSHIFT(mod)) {
+    tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_P);
     doublequote = true;
@@ -146,6 +150,7 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
     tk_press(tk_R);
     opensquare = true;
   } else if (key == U_OPENSQUARE && ISSHIFT(mod)) {
+    tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_F);
     opencurly = true;
@@ -154,6 +159,7 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
     tk_press(tk_T);
     closesquare = true;
   } else if (key == U_CLOSESQUARE && ISSHIFT(mod)) {
+    tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_G);
     closecurly = true;
@@ -199,8 +205,9 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
     }
   } else if (key == U_SLASH) {
     if (question) {
-      tk_release(tk_Fctn);
       tk_release(tk_I);
+      tk_release(tk_Fctn);
+      tk_press(tk_Shift);
       question = false;
     } else {
       tk_release(tk_Slash);
@@ -210,6 +217,7 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
     if (pipe) {
       tk_release(tk_A);
       tk_release(tk_Fctn);
+      tk_press(tk_Shift);
       pipe = false;
     } else {
       tk_release(tk_Z);
@@ -220,6 +228,7 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
     if (tilde) {
       tk_release(tk_W);
       tk_release(tk_Fctn);
+      tk_press(tk_Shift);
       tilde = false;
     } else {
       tk_release(tk_C);
@@ -230,6 +239,7 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
     if (doublequote) {
       tk_release(tk_P);
       tk_release(tk_Fctn);
+      tk_press(tk_Shift);
       doublequote = false;
     } else {
       tk_release(tk_O);
@@ -244,6 +254,7 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
     } else {
       tk_release(tk_F);
       tk_release(tk_Fctn);
+      tk_press(tk_Shift);
       opencurly = false;
     }
   } else if (key == U_CLOSESQUARE) {
@@ -254,6 +265,7 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
     } else {
       tk_release(tk_G);
       tk_release(tk_Fctn);
+      tk_press(tk_Shift);
       closecurly = false;
     }
   }
