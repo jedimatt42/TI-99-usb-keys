@@ -58,8 +58,7 @@ void loop()
   uint8_t state = Usb.getUsbTaskState();
   
   if (state != USB_STATE_RUNNING) {
-    long rightnow = loopMillis;
-    if ( (rightnow - lastGoodState) > 5000 ) {
+    if ((loopMillis - lastGoodState) > 5000) {
       CPU_RESTART;
     }
   } else {
@@ -70,6 +69,8 @@ void loop()
       firstBoot = 0; 
     }
   }
-
+  if ((loopMillis - lastInterrupted) > 200) {
+    onTiColumnChange();
+  }
 }
 

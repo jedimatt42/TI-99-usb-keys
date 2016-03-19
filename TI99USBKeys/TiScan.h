@@ -25,16 +25,7 @@ void setRowOutputs(int* rows, int alock)
   setOutputPin(ti_r7, rows[7]);
 }
 
-void clearOutputs(int alock) {
-  digitalWrite(ti_r0, HIGH);
-  digitalWrite(ti_r1, HIGH);
-  digitalWrite(ti_r2, HIGH);
-  digitalWrite(ti_r3, HIGH);
-  digitalWrite(ti_r4, alock ? LOW : HIGH);
-  digitalWrite(ti_r5, HIGH);
-  digitalWrite(ti_r6, HIGH);
-  digitalWrite(ti_r7, HIGH);
-}
+long lastInterrupted = 0x7FFFFFFF;
 
 void onTiColumnChange()
 {
@@ -65,6 +56,7 @@ void onTiColumnChange()
     setRowOutputs(c5rows, alock);
   }
 
+  lastInterrupted = millis();
   interrupts();
 }
 
@@ -78,11 +70,6 @@ void setColumnInterrupts()
   attachInterrupt(ti_c4, onTiColumnChange, interruptMode);
   attachInterrupt(ti_c5, onTiColumnChange, interruptMode);
   attachInterrupt(ti_c6, onTiColumnChange, interruptMode);
-}
-
-void forceFctnEquals(int state) {
-  setOutputPin(ti_r0, state);
-  setOutputPin(ti_r4, state);
 }
 
 #endif

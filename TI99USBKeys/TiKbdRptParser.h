@@ -86,9 +86,6 @@ void TiKbdRptParser::OnControlKeysChanged(uint8_t before, uint8_t after)
 void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
 {
   if (handleSimple(key, 1)) {
-    if(key == U_EQUAL && ISALT(mod)) {
-      forceFctnEquals(1);
-    }
     return;
   }
   if (mod == 0 && handleFunction(key, 1)) {
@@ -163,19 +160,12 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
     tk_press(tk_Fctn);
     tk_press(tk_G);
     closecurly = true;
-  } else if (key == U_BREAK || key == U_F4) {
-    tk_press(tk_Fctn);
-    tk_press(tk_4);
-    digitalWrite(ti_r4,LOW);
   }
 }
 
 void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 {
   if (handleSimple(key, 0)) {
-    if(key == U_EQUAL && ISALT(mod)) {
-      forceFctnEquals(0);
-    }
     return;
   }
   if (mod == 0 && handleFunction(key, 0)) {
@@ -270,12 +260,6 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
     }
   }
 
-  else if (key == U_BREAK || key == U_F4) {
-    tk_release(tk_Fctn);
-    tk_release(tk_4);
-    digitalWrite(ti_r4,HIGH);
-  }
-   
   else if (key == U_CAPSLOCK) {
       *tk_Alpha = kbdLockingKeys.kbdLeds.bmCapsLock;
   }
@@ -370,7 +354,7 @@ boolean TiKbdRptParser::handleFunction(uint8_t key, int state)
     FCASE(U_F1,tk_1);
     FCASE(U_F2,tk_2);
     FCASE(U_F3,tk_3);
-    //FCASE(U_F4,tk_4);
+    FCASE(U_F4,tk_4);
     FCASE(U_F5,tk_5);
     FCASE(U_F6,tk_6);
     FCASE(U_F7,tk_7);
@@ -384,7 +368,7 @@ boolean TiKbdRptParser::handleFunction(uint8_t key, int state)
     BCASE(U_NUMSLASH,tk_Slash);
     SCASE(U_NUMPAD_PLUS,tk_Equal);
     BCASE(U_NUMPAD_ENTER,tk_Enter);
-    //FCASE(U_BREAK,tk_4);
+    FCASE(U_BREAK,tk_4);
     CCASE(U_HOME,tk_U);
     CCASE(U_END,tk_V);
     FCASE(U_TAB,tk_7);
