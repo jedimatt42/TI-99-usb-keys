@@ -109,12 +109,20 @@ boolean isHandsFree()
 
 void tk_release(int * key)
 {
-  *key = (*key - 1);
+  if (key == tk_Fctn || key == tk_Shift || key == tk_Ctrl) {
+    *key = (*key - 1);
+  } else {
+    *key = 0;
+  }
 }
 
 void tk_press(int * key)
 {
+  if (key == tk_Fctn || key == tk_Shift || key == tk_Ctrl) {
   *key = (*key + 1);
+  } else {
+    *key = 1;
+  }
 }
 
 #endif

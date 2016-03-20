@@ -36,6 +36,8 @@ class TiKbdRptParser : public KeyboardReportParser
     boolean closesquare = false;
     boolean opencurly = false;
     boolean closecurly = false;
+    int magic = 0; // If this is set, a magic combo is active. Such as Shift tranformed to Fctn, or magically pressing fctn for a [. 
+    // we'll increment magic on keypresses during magic, and then only release finally once magic is unwound.
 
   public:
     TiKbdRptParser();
@@ -101,70 +103,70 @@ void TiKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key)
   if (key == U_HYPHEN && mod == 0) {
     tk_press(tk_Shift);
     tk_press(tk_Slash);
-    hyphen = true;
+    hyphen = true; magic++;
   } else if (key == U_HYPHEN && ISSHIFT(mod)) {
     tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_U);
-    underscore = true;
+    underscore = true; magic++;
   } else if (key == U_SLASH && mod == 0) {
     tk_press(tk_Slash);
-    slash = true;
+    slash = true; magic++;
   } else if (key == U_SLASH && ISSHIFT(mod)) {
     tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_I);
-    question = true;
+    question = true; magic++;
   } else if (key == U_BACKSLASH && mod == 0) {
     tk_press(tk_Fctn);
     tk_press(tk_Z);
-    backslash = true;
+    backslash = true; magic++;
   } else if (key == U_BACKSLASH && ISSHIFT(mod)) {
     tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_A);
-    pipe = true;
+    pipe = true; magic++;
   } else if (key == U_BACKQUOTE && mod == 0) {
     tk_press(tk_Fctn);
     tk_press(tk_C);
-    backquote = true;
+    backquote = true; magic++;
   } else if (key == U_BACKQUOTE && ISSHIFT(mod)) {
     tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_W);
-    tilde = true;
+    tilde = true; magic++;
   } else if (key == U_QUOTE && mod == 0) {
     tk_press(tk_Fctn);
     tk_press(tk_O);
-    quote = true;
+    quote = true; magic++;
   } else if (key == U_QUOTE && ISSHIFT(mod)) {
     tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_P);
-    doublequote = true;
+    doublequote = true; magic++;
   } else if (key == U_OPENSQUARE && mod == 0) {
     tk_press(tk_Fctn);
     tk_press(tk_R);
-    opensquare = true;
+    opensquare = true; magic++;
   } else if (key == U_OPENSQUARE && ISSHIFT(mod)) {
     tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_F);
-    opencurly = true;
+    opencurly = true; magic++;
   } else if (key == U_CLOSESQUARE && mod == 0) {
     tk_press(tk_Fctn);
     tk_press(tk_T);
-    closesquare = true;
+    closesquare = true; magic++;
   } else if (key == U_CLOSESQUARE && ISSHIFT(mod)) {
     tk_release(tk_Shift);
     tk_press(tk_Fctn);
     tk_press(tk_G);
-    closecurly = true;
+    closecurly = true; magic++;
   }
 }
 
 void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
-{
+{  
   if (handleSimple(key, 0)) {
     return;
   }
@@ -178,85 +180,81 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
     return;
   }
 
-  // This section below creates bugs! If the modifier is released before the
-  // primary key, then we don't releae the key in the TI keyboard.
-
-
   if (key == U_HYPHEN) {
     if (underscore) {
       tk_release(tk_U);
       tk_release(tk_Fctn);
       tk_press(tk_Shift);
-      underscore = false;
+      underscore = false; magic--;
     } else {
       tk_release(tk_Slash);
       tk_release(tk_Shift);
-      hyphen = false;
+      hyphen = false; magic--;
     }
   } else if (key == U_SLASH) {
     if (question) {
       tk_release(tk_I);
       tk_release(tk_Fctn);
       tk_press(tk_Shift);
-      question = false;
+      question = false; magic--;
     } else {
       tk_release(tk_Slash);
-      slash = false;
+      slash = false; magic--;
     }
   } else if (key == U_BACKSLASH) {
     if (pipe) {
       tk_release(tk_A);
       tk_release(tk_Fctn);
       tk_press(tk_Shift);
-      pipe = false;
+      pipe = false; magic--;
     } else {
       tk_release(tk_Z);
       tk_release(tk_Fctn);
-      backslash = false;
+      backslash = false; magic--;
     }
   } else if (key == U_BACKQUOTE) {
     if (tilde) {
       tk_release(tk_W);
       tk_release(tk_Fctn);
       tk_press(tk_Shift);
-      tilde = false;
+      tilde = false; magic--;
     } else {
       tk_release(tk_C);
       tk_release(tk_Fctn);
-      backquote = false;
+      backquote = false; magic--;
     }
   } else if (key == U_QUOTE) {
     if (doublequote) {
       tk_release(tk_P);
       tk_release(tk_Fctn);
       tk_press(tk_Shift);
-      doublequote = false;
+      doublequote = false; magic--;
     } else {
       tk_release(tk_O);
       tk_release(tk_Fctn);
-      quote = false;
+      quote = false; magic--;
     }
   } else if (key == U_OPENSQUARE) {
     if (opensquare) {
       tk_release(tk_R);
       tk_release(tk_Fctn);
-      opensquare = false;
+      opensquare = false; magic--;
     } else {
       tk_release(tk_F);
       tk_release(tk_Fctn);
       tk_press(tk_Shift);
-      opencurly = false;
+      opencurly = false; magic--;
     }
   } else if (key == U_CLOSESQUARE) {
     if (closesquare) {
       tk_release(tk_T);
       tk_release(tk_Fctn);
-      closesquare = false;
+      closesquare = false; magic--;
     } else {
       tk_release(tk_G);
       tk_release(tk_Fctn);
       tk_press(tk_Shift);
-      closecurly = false;
+      closecurly = false; magic--;
     }
   }
 
@@ -292,10 +290,17 @@ void TiKbdRptParser::OnKeyUp(uint8_t mod, uint8_t key)
 }
 
 #define BCASE(X, Y) case X: if(state) { tk_press(Y); } else { tk_release(Y); } return true
+#define FCASE(X, Y) case X: if(state) { tk_press(tk_Fctn); tk_press(Y); magic++; } else { tk_release(Y); tk_release(tk_Fctn); magic--; } return true
+#define CCASE(X, Y) case X: if(state) { tk_press(tk_Ctrl); tk_press(Y); magic++; } else { tk_release(Y); tk_release(tk_Ctrl); magic--; } return true
+#define SCASE(X, Y) case X: if(state) { tk_press(tk_Shift); tk_press(Y); magic++; } else { tk_release(Y); tk_release(tk_Shift); magic--; } return true
 
 // Handle the keys that are a one to one mapping, with no modifier issues.
 boolean TiKbdRptParser::handleSimple(uint8_t key, int state)
-{
+{    
+  if (state && magic) {
+    return false;
+  }
+  
   switch(key) {
     BCASE(U_NUM1,tk_1);
     BCASE(U_NUM2,tk_2);
@@ -343,12 +348,8 @@ boolean TiKbdRptParser::handleSimple(uint8_t key, int state)
   return false;
 }
 
-#define FCASE(X, Y) case X: if(state) { tk_press(tk_Fctn); tk_press(Y); } else { tk_release(Y); tk_release(tk_Fctn); } return true
-#define CCASE(X, Y) case X: if(state) { tk_press(tk_Ctrl); tk_press(Y); } else { tk_release(Y); tk_release(tk_Ctrl); } return true
-#define SCASE(X, Y) case X: if(state) { tk_press(tk_Shift); tk_press(Y); } else { tk_release(Y); tk_release(tk_Shift); } return true
-
 boolean TiKbdRptParser::handleFunction(uint8_t key, int state)
-{
+{  
   switch(key) {
     FCASE(U_BACKSPACE,tk_S);
     FCASE(U_F1,tk_1);
