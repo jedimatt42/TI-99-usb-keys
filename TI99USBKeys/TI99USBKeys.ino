@@ -38,8 +38,6 @@ void setup()
 {
   firstBoot = lastGoodState = millis();
   
-  initPinModes();
-  setColumnInterrupts();
   initData();
 
   // Wait for keyboard to be up
@@ -47,6 +45,12 @@ void setup()
     delay( 20 );
 
   HidKeyboard.SetReportParser(0, (HIDReportParser*)&Prs);
+}
+
+void gpioSetup()
+{
+  initPinModes();
+  setColumnInterrupts();
 }
 
 void loop()
@@ -67,6 +71,7 @@ void loop()
       // Set numlock and capslock on, leave scroll lock off.
       Prs.setKeyLocks(&HidKeyboard, NUMLOCK_STARTUP, CAPSLOCK_STARTUP, SCROLLLOCK_STARTUP);
       firstBoot = 0; 
+      gpioSetup();
     }
   }
   if ((loopMillis - lastInterrupted) > 200) {
