@@ -7,3 +7,15 @@ The USB keyboard can be used with the TI keyboard still in place. The user can s
 
 [Project Website](http://ti994a.cwfk.net/TiUsbKeys.html)
 
+## Design files
+
+TIUSBKeys.rrb - PCBoard layout from Robot Room Copper Connection Studio Edition v3.0
+
+gerber - folder containing necessary gerber images and drill files for printing pcboard
+
+TIUSBKeys.sch - PCBExpress schematic source file
+
+schematic.pdf - schematic exported to PDF
+
+TI99USBKeys - folder containing arduino project files for Teensy 3.x
+
