@@ -5,7 +5,7 @@ This project interfaces a Teensy 3.1 and a Circuits@Home USB Host shield, to tak
 
 The USB keyboard can be used with the TI keyboard still in place. The user can switch between them at will.
 
-[Project Website](http://ti994a.cwfk.net/TiUsbKeys.html)
+[Project Website](https://www.jedimatt42.com/ti99usbkeys.html)
 
 ## Design files
 
